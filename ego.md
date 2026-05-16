@@ -93,9 +93,11 @@ The ego skips this step. The ego says: *"My model is correct. Their model is wro
 
 ## Forcing Your Model on Someone Else
 
-There is a thing that feels like help but is not.
+There is a thing that feels like help but is not. It is the ego's hierarchy wearing the mask of generosity — the need to sit *above* someone, repackaged as the desire to lift them up.
 
 It looks like this: you have a belief — about career, about relationships, about health, about how to live — that has worked for you. You see someone struggling. You tell them the answer. You tell them again. You get frustrated when they don't change. You conclude they are stupid, or stubborn, or self-destructive.
+
+Notice the structure: *you* have the answer, *they* don't. *You* see clearly, *they* are blind. The hierarchy is baked in before the first word of advice leaves your mouth. Helping from above is still *from above*.
 
 What actually happened:
 
@@ -151,15 +153,17 @@ But it produces something the ego never can:
 
 ## We Are All Running on the Same Hardware
 
+The previous section was about inputs — different training data producing different models. This section is about something more fundamental: the hardware itself.
+
 Strip away the stories. The titles. The hierarchies. The narratives about who is smart and who is stupid, who has it figured out and who is a mess.
 
-What is left is this: eight billion biological prediction engines, all running on the same architecture, all fed different data, all generating different models, all incomplete, all updating at different rates, all — every single one — trying to make sense of a reality that exceeds their capacity to model it.
+What is left is this: eight billion biological prediction engines, all running on the same architecture. Same prefrontal bandwidth limitations. Same working memory bottleneck — roughly four objects at a time. Same emotional circuitry hijacking the executive system under stress. Same sleep dependency. Same cognitive biases baked into the firmware.[^kahneman]
 
-The physicist and the dropout. The monk and the addict. The CEO and the line cook. Same hardware. Different inputs. Different models. Same loop.
+The physicist and the dropout. The monk and the addict. The CEO and the line cook. Same hardware. Same fundamental constraints. The same architecture that lets a physicist model quantum fields is the same architecture that makes that physicist rationalize a terrible marriage. The brilliance and the blindness come from the same machine.
 
-Some have been luckier in their training data. Some have been more disciplined in their updates. Some have had access to better tools — education, mentorship, stability, the luxury of time to think. None of these advantages make one brain *better* than another in any fundamental sense. They make it better-positioned for certain kinds of updates. That's all.
+This is what the ego can never accept: there is no premium tier of human hardware. No one is running on a better processor. The differences are in inputs, in timing, in which updates landed and which got deflected — but the *ceiling of the system* is the same for all of us. We are all bounded. All lossy. All running prediction engines that exceed their error-correction capacity every single day.
 
-The person you think is an idiot is running the best model their training data produced. So are you. The person you think is beneath you is solving problems you have never had to face, with constraints you have never experienced, using the same hardware you use. The person you look down on for not seeing what you see was never shown what you were shown.
+The person you think is beneath you is solving problems you have never had to face, with constraints you have never experienced, using the same hardware you use — a machine that is, at its root, equally capable of brilliance and catastrophic failure in every skull it occupies.
 
 ---
 
