@@ -69,19 +69,19 @@ Every stage is the same shape. Belief → Guess → Move → Reality → Surpris
 
 ## Nobody Knows Anything
 
-Here is the thing the history obscures: **at every stage, the people running the model thought they had the answer.**
+Here is the thing the history obscures: **at every stage, the people running the model felt like they had the answer — and simultaneously knew, somewhere, that they didn't.**
 
-The animist was not uncertain. The mythologist was not hedging. The Aristotelian was not tentative. Newton thought he had found the final laws. Lord Kelvin said physics was almost complete in 1900. Five years before Einstein dismantled the frame.
+The animist was not blindly confident. When the sacrifice failed, they assumed they did the ritual wrong, or that another god interfered. The mythologist built entire theological systems to explain why the model sometimes broke. The Aristotelian catalogued exceptions. These were not people ignoring their errors. They were people *patching* their errors — running the loop, even without a name for it.
 
-This is not a flaw in the people. It is a flaw in the hardware.
+And this is the part that makes the argument stronger, not weaker: **the loop is so deeply wired that even people operating inside models we now call "wrong" were still trying to update.** They hedged. They accounted for failure. They revised. They just lacked the tools to revise *well* — controlled experiments, falsifiability, honest documentation.
 
-The brain is a prediction engine that **experiences its own predictions as reality**. This is Friston's deepest insight: perception is not passive recording. It is active hallucination, constrained by sensory data. You do not see the world. You see your model's best guess, corrected at the edges by incoming signal.
+Newton thought he had found the final laws. Lord Kelvin said physics was almost complete in 1900. Five years before Einstein dismantled the frame. The pattern is not "people were stupid and then got smart." The pattern is: **the brain experiences its own predictions as reality** — and the better the model works locally, the harder it becomes to notice where it's still wrong.
 
-Which means: at any given moment, what you "know" is just the current state of a model that has not yet been surprised enough to update.
+This is Friston's deepest insight: perception is not passive recording. It is active hallucination, constrained by sensory data. You do not see the world. You see your model's best guess, corrected at the edges by incoming signal.
 
-Everyone — every scientist, every philosopher, every engineer, every parent, every politician — is running the loop with incomplete data, imperfect hardware, and a biological tendency to mistake confidence for truth.
+Which means: at any given moment, what you "know" is just the current state of a model that has not yet been surprised enough to update. And the belief you start with determines which experiments you run. Which experiments you run determines which surprises you encounter. Which surprises you encounter determines what your model becomes.
 
-We are all improvising. The question is not whether your model is wrong. It is wrong. The question is: **how quickly does it update when reality disagrees?**
+Everyone — every scientist, every shaman, every engineer, every parent — is running the loop with incomplete data, imperfect hardware, and a biological tendency to mistake confidence for truth. The difference is never loop-or-no-loop. It is always: **how honestly does the loop run? How quickly does the model update when reality disagrees?**
 
 ---
 

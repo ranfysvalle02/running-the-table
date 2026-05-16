@@ -1,6 +1,10 @@
 # Running the Table
 
+![](bg.png)
+
 Pool term for clearing all balls without a miss. Also: running the simulation. Also: what hyperfocus feels like. Same algorithm, three substrates: a pool table, a neural network, and you.
+
+Takes a concept that usually suffers from being overly abstract or overly "self-help-y" and anchors it in concrete cognitive science, neurobiology, and machine learning metaphors.
 
 ---
 
