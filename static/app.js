@@ -343,8 +343,6 @@
     // of the inlaid diamonds, just inboard so the player can read them
     // the same way they would at a real table.
     drawDiamondNumberLabels(geo);
-    // KITCHEN label on the bottom short rail (where the cue lives).
-    drawKitchenLabel(geo);
 
     // ----- felt with circular pocket cutouts using clip()
     ctx.save();
@@ -527,39 +525,6 @@
       const tx = geo.outerX + (i / 4) * geo.tableW;
       drawNum(tx, geo.outerY + numOffset, i);
       drawNum(tx, geo.outerY + geo.tableH - numOffset, i);
-    }
-    ctx.restore();
-  }
-
-  // KITCHEN label on the bottom short rail (where the cue ball sits at
-  // world y=30). Sits on the OUTBOARD half of the bottom rail wood -
-  // below the row of diamond inlays + their numbered labels - so it
-  // never collides with diamond #2 (which is dead-center on the rail).
-  function drawKitchenLabel(geo) {
-    ctx.save();
-    ctx.font = "700 11px 'JetBrains Mono', monospace";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    // Sit on the felt-side half of the bottom rail wood, BELOW the
-    // diamond inlays + numbered labels (which now live on the outboard
-    // half). Tracking is letter-spaced manually so the word reads as a
-    // rail engraving rather than a tight word.
-    const railY = geo.outerY + geo.tableH - geo.railThickness * 0.82;
-    const txt = "KITCHEN";
-    // Manual letter-spacing for legibility on the wood rail.
-    const letters = txt.split("");
-    const spacing = 11;
-    const totalW = (letters.length - 1) * spacing;
-    let x = geo.outerX + geo.tableW / 2 - totalW / 2;
-    // Single backplate spanning the whole word.
-    const plateW = totalW + 22;
-    ctx.fillStyle = "rgba(7, 10, 14, 0.6)";
-    roundRect(geo.outerX + geo.tableW / 2 - plateW / 2, railY - 9, plateW, 18, 4);
-    ctx.fill();
-    ctx.fillStyle = "rgba(247, 232, 190, 0.95)";
-    for (const ch of letters) {
-      ctx.fillText(ch, x, railY);
-      x += spacing;
     }
     ctx.restore();
   }

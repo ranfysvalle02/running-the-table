@@ -235,7 +235,7 @@ Friends will offer Story A in disguise: *"just focus."* Doctors will offer pills
 
 This is the moment most ADHD careers quietly collapse — under the weight of Story A. Or, for the engineers who learn to choose, the moment they transform.
 
-The transformation almost never happens at a desk. It usually happens somewhere strange. A workshop. A climbing gym. A racetrack. A kitchen line. A piano.
+The transformation almost never happens at a desk. It usually happens somewhere strange. A workshop. A climbing gym. A racetrack. A piano.
 
 For the engineer in our story, it happens at a pool table.
 
@@ -260,7 +260,7 @@ By the end of the night, the twitch is gone. His head is quiet for the first tim
 
 He doesn't understand, then, why it works. The neuroscience does — and so does the narrative.
 
-> A pool table, set up correctly, is the most efficient flow-state-generating device a software engineer can own. The same logic, with minor variations, applies to a climbing wall, a piano, a kitchen line, a welding bench, a chess clock, a kiln, or a video game with honest controls.
+> A pool table, set up correctly, is the most efficient flow-state-generating device a software engineer can own. The same logic, with minor variations, applies to a climbing wall, a piano, a welding bench, a chess clock, a kiln, or a video game with honest controls.
 
 It is a **physical, analog IDE.** A debugger you can hold in your hand. It satisfies, with almost suspicious precision, every condition Csikszentmihalyi laid out for flow and every fuel source Dodson identified for the interest-based nervous system.
 
@@ -970,7 +970,7 @@ The hunger is not the problem.
 
 Architect a life — a job, a hobby, a side project, a Saturday morning — where the loops are tight, the rules are honest, the feedback is instant, the difficulty is yours to set, and **the story is yours to write.**
 
-Do that, and the same trait that makes a person "scattered" in a status meeting will make them devastating at the keyboard. The table. The workshop. The kitchen. The easel. The climbing wall. The operating room.
+Do that, and the same trait that makes a person "scattered" in a status meeting will make them devastating at the keyboard. The table. The workshop. The easel. The climbing wall. The operating room.
 
 That is what neurodivergence-as-superpower actually looks like. Not affirmations. Not productivity hacks. **Mechanism, applied honestly to a brain that finally gets to run on the fuel it was built for — pointed by a story it finally got to author itself.**
 
