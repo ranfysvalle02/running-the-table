@@ -1,0 +1,2028 @@
+:root {
+  --bg-0: #07090c;
+  --bg-1: #0d1117;
+  --bg-2: #131923;
+  --line: #1f2632;
+  --line-strong: #2d3543;
+  --text: #f1f4f8;
+  --muted: #8893a4;
+  --muted-2: #5b6373;
+  --accent: #d8fff5;
+  --accent-strong: #5be1c0;
+  --gold: #ffd37b;
+  --danger: #ff6b6b;
+  --felt-top: #1f5a51;
+  --felt-bot: #103a35;
+  --rail: #1b1815;
+  --rail-edge: #2b2620;
+  --shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+  --diamond-num: rgba(247, 232, 190, 0.85);
+  --diamond-pip: rgba(91, 225, 192, 0.95);
+  --diamond-bounce: rgba(255, 211, 123, 0.95);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    sans-serif;
+  background:
+    radial-gradient(900px 500px at 50% -10%, #1a2333 0%, transparent 60%),
+    var(--bg-0);
+  color: var(--text);
+  overflow-x: hidden;
+  letter-spacing: 0.01em;
+}
+
+/* -------------------------------------------------------------------- */
+/* topbar / loop / constitution                                         */
+/* -------------------------------------------------------------------- */
+
+.topbar {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(0, auto) auto;
+  align-items: center;
+  gap: 24px;
+  padding: 12px 28px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(7, 9, 12, 0.85);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  backdrop-filter: blur(10px);
+}
+
+.brand-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.brand-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #fff, #c5cad4 70%);
+  box-shadow: 0 0 12px rgba(213, 219, 230, 0.45);
+}
+
+/* THE CONSTITUTION. Never animates. Never reflows. Never rotates.
+   One fixed two-line stanza, set once, present everywhere. */
+.constitution {
+  margin: 0;
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+  font-size: 11.5px;
+  line-height: 1.45;
+  letter-spacing: 0.005em;
+  color: var(--muted);
+  font-style: italic;
+  max-width: 540px;
+}
+
+.loop {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.loop li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  transition: all 200ms ease;
+  background: var(--bg-1);
+}
+
+.loop li span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--bg-2);
+  border: 1px solid var(--line-strong);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.loop li.active {
+  color: var(--accent);
+  border-color: rgba(91, 225, 192, 0.45);
+  box-shadow: 0 0 0 1px rgba(91, 225, 192, 0.18) inset,
+    0 0 24px rgba(91, 225, 192, 0.12);
+}
+
+.loop li.active span {
+  background: rgba(91, 225, 192, 0.15);
+  border-color: rgba(91, 225, 192, 0.55);
+  color: var(--accent);
+}
+
+.loop li.done {
+  color: #b3bccb;
+  border-color: var(--line-strong);
+}
+
+.topbar-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  justify-self: end;
+}
+
+.watch-btn {
+  background: linear-gradient(180deg, rgba(91, 225, 192, 0.18), rgba(91, 225, 192, 0.06));
+  border: 1px solid rgba(91, 225, 192, 0.45);
+  color: var(--accent);
+  padding: 8px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 600;
+  transition: all 220ms ease, color 320ms ease;
+}
+
+.watch-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, rgba(91, 225, 192, 0.28), rgba(91, 225, 192, 0.1));
+  box-shadow: 0 0 20px rgba(91, 225, 192, 0.18);
+}
+
+.watch-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  color: var(--muted);
+  border-color: var(--line-strong);
+  background: transparent;
+}
+
+.watch-btn.training {
+  color: var(--gold);
+  border-color: rgba(255, 211, 123, 0.55);
+  background: linear-gradient(180deg, rgba(255, 211, 123, 0.16), rgba(255, 211, 123, 0.04));
+  box-shadow: 0 0 18px rgba(255, 211, 123, 0.12);
+}
+
+.watch-btn.committed {
+  color: var(--accent-strong);
+  border-color: rgba(91, 225, 192, 0.75);
+  box-shadow: 0 0 22px rgba(91, 225, 192, 0.22);
+}
+
+/* -------------------------------------------------------------------- */
+/* stage layout                                                          */
+/* -------------------------------------------------------------------- */
+
+.stage {
+  display: grid;
+  grid-template-columns: minmax(340px, 1fr) minmax(420px, 540px);
+  gap: 32px;
+  padding: 14px 40px 24px;
+  align-items: stretch;
+}
+
+.table-wrap {
+  position: relative;
+  border-radius: 22px;
+  background: linear-gradient(180deg, #0e131c, #060810);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  /* No more quote band + no more coach toolbar. Vertical budget is
+     just topbar (~76px) + stage padding (~34px) = ~110px reserved. */
+  aspect-ratio: 1 / 2;
+  height: min(calc(100vh - 110px), 880px);
+  max-width: 100%;
+  margin-inline: auto;
+  justify-self: center;
+}
+
+#table-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+/* Frozen state cursor: subtle hint that the felt itself is the rack
+   gesture. Pointer over the painted trajectory is set by JS at hover. */
+.table-wrap.frozen #table-canvas {
+  cursor: crosshair;
+}
+
+/* Single-line "next action" CTA inside the narrator block. Replaces
+   the old felt-overlay #hint pill so the table itself stays text-free.
+   Sits just under the gesture pictograms; tone shifts with state
+   (idle, made, miss, ood) so it visually reinforces the verdict. */
+.narrator-cta {
+  margin: 4px 0 10px;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: rgba(247, 247, 252, 0.78);
+  font-style: italic;
+  line-height: 1.45;
+  min-height: 17px;
+  transition: color 200ms ease;
+}
+.narrator-block.made .narrator-cta {
+  color: rgba(91, 225, 192, 0.95);
+  font-style: normal;
+}
+.narrator-block.miss .narrator-cta,
+.narrator-block.ood .narrator-cta {
+  color: rgba(255, 158, 60, 0.95);
+  font-style: normal;
+}
+.narrator-block.celebration .narrator-cta {
+  color: var(--gold);
+  font-style: normal;
+}
+
+/* The on-felt frozen-state tip pills, the top-left "Agent ready" /
+   "Cue locked at (50, 30)" chips, and the bottom-of-felt #hint pill
+   have all been pulled off the table. The narrator block + gesture
+   pictograms in the right rail carry the same information without
+   crowding the felt. */
+
+/* -------------------------------------------------------------------- */
+/* side panel                                                            */
+/* -------------------------------------------------------------------- */
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: linear-gradient(180deg, #10151d, #0a0e15);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 18px;
+  box-shadow: var(--shadow);
+  min-height: 0;
+  max-height: min(calc(100vh - 110px), 880px);
+  height: min(calc(100vh - 110px), 880px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+.panel::-webkit-scrollbar { width: 6px; }
+.panel::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 6px; }
+
+/* Dashboard blocks ---------------------------------------------------- */
+
+.block {
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgba(7, 10, 14, 0.55);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.block-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.block-caption {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+  letter-spacing: 0.01em;
+}
+
+.block-caption em {
+  color: #b3bccb;
+  font-style: italic;
+}
+
+.mono-pill {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: rgba(13, 17, 23, 0.7);
+  color: var(--text);
+}
+
+/* Block kebab (overflow menu)----------------------------------------- */
+
+.block-kebab-wrap {
+  position: relative;
+}
+
+.block-kebab {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--muted);
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 160ms ease, background 160ms ease, border-color 160ms ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.block-kebab:hover,
+.block-kebab[aria-expanded="true"] {
+  color: var(--accent);
+  background: rgba(91, 225, 192, 0.08);
+  border-color: rgba(91, 225, 192, 0.25);
+}
+
+.block-kebab-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 200px;
+  background: linear-gradient(180deg, #11161f, #0a0e15);
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  padding: 6px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+  z-index: 20;
+}
+
+.block-kebab-menu.hidden {
+  display: none;
+}
+
+.kebab-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: var(--text);
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+  font-size: 12.5px;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  text-align: left;
+}
+
+.kebab-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.kebab-item.danger {
+  color: var(--danger);
+}
+
+.kebab-item.danger:hover {
+  background: rgba(255, 107, 107, 0.12);
+}
+
+.kebab-item:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.kebab-glyph {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 14px;
+}
+
+/* Narrator block (+ folded-in verdict) ------------------------------- */
+
+.narrator-block {
+  border-color: rgba(91, 225, 192, 0.15);
+  background: linear-gradient(180deg, rgba(91, 225, 192, 0.05), rgba(7, 10, 14, 0.5));
+}
+
+.narrator-block h2 {
+  margin: 0;
+  font-size: 19px;
+  letter-spacing: 0.025em;
+  text-transform: capitalize;
+  transition: color 200ms ease, text-shadow 200ms ease, letter-spacing 240ms ease;
+}
+/* When the verdict resolves, the phase title gets bigger + glow */
+.narrator-block.made h2 {
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-shadow: 0 0 16px rgba(91, 225, 192, 0.42);
+}
+.narrator-block.miss h2 {
+  color: #ffb185;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.narrator-block.ood h2 {
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-shadow: 0 0 16px rgba(255, 211, 123, 0.45);
+}
+
+.narrator {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text);
+  /* Locked height so updates never reflow the rest of the rail. */
+  height: 4.6em;
+  overflow: hidden;
+}
+
+.narrator strong { color: var(--accent); font-weight: 600; }
+
+.narrator-gestures {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--muted-2);
+  text-transform: uppercase;
+}
+.narrator-gestures .ng-item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+}
+/* In the frozen post-shot state, the only sensible gestures are
+   replay + rack. Hide the aim-mode "click pocket = call shot" hint
+   so the user isn't told to do three things on a finished shot. */
+.narrator-block:not(.made):not(.miss):not(.ood) .ng-frozen { display: none; }
+.narrator-block.made .ng-aim,
+.narrator-block.miss .ng-aim,
+.narrator-block.ood .ng-aim { display: none; }
+
+.ng-key {
+  color: var(--muted);
+  font-size: 12px;
+  margin-right: 2px;
+}
+
+/* Live aim readout: replaces the old on-felt CUE LOCKED / D1.2 / HS
+   labels. Compact 4-column row, monospace, never reflows. */
+.aim-readout {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(7, 10, 14, 0.55);
+  border: 1px solid rgba(91, 225, 192, 0.18);
+}
+.aim-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+}
+.aim-key {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+}
+.aim-val {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+}
+.aim-val.active {
+  color: var(--accent);
+}
+.aim-val.locked {
+  color: var(--gold);
+  text-shadow: 0 0 10px rgba(255, 211, 123, 0.35);
+}
+
+.verdict-region {
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.verdict-metrics {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  padding: 8px 6px;
+  background: rgba(0, 0, 0, 0.32);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.verdict-metrics div { display: flex; flex-direction: column; gap: 1px; align-items: center; }
+.verdict-metrics dt {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+  margin: 0;
+}
+.verdict-metrics dd {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+}
+
+.narrator-block.made .verdict-metrics dd { color: var(--accent); }
+.narrator-block.miss .verdict-metrics dd { color: var(--gold); }
+.narrator-block.ood .verdict-metrics dd { color: var(--gold); }
+
+/* Lock-in celebration: gold halo + scanline shimmer to mark the
+   moment the trained reflex made the shot. Holds for ~3s before
+   restoring the regular narrator palette. */
+.narrator-block.celebration {
+  border-color: rgba(255, 211, 123, 0.45);
+  box-shadow:
+    0 0 0 1px rgba(255, 211, 123, 0.18),
+    0 0 32px rgba(255, 211, 123, 0.18) inset;
+  animation: celebration-throb 1.6s ease-out 1;
+}
+.narrator-block.celebration h2 {
+  color: var(--gold);
+  text-shadow: 0 0 18px rgba(255, 211, 123, 0.45);
+  letter-spacing: 0.04em;
+}
+@keyframes celebration-throb {
+  0% { box-shadow: 0 0 0 1px rgba(255, 211, 123, 0.05), 0 0 0 rgba(255, 211, 123, 0) inset; }
+  35% { box-shadow: 0 0 0 1px rgba(255, 211, 123, 0.3), 0 0 60px rgba(255, 211, 123, 0.35) inset; }
+  100% { box-shadow: 0 0 0 1px rgba(255, 211, 123, 0.18), 0 0 32px rgba(255, 211, 123, 0.18) inset; }
+}
+
+/* RPE history sparkline: small vertical bars representing the dopamine
+   spikes from the last N shots. Gold up = positive RPE (made better
+   than expected). Crimson down = negative RPE (missed worse than
+   expected). The newest bar pulses. */
+.rpe-history {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.32);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.rpe-history-eyebrow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+}
+.rpe-history-hint {
+  font-style: italic;
+  text-transform: none;
+  letter-spacing: 0.02em;
+  color: rgba(255, 211, 123, 0.6);
+  font-size: 9px;
+}
+.rpe-history-bars {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 3px;
+  align-items: center;
+  height: 44px;
+}
+/* Center reference line so positive/negative bars grow up/down */
+.rpe-history-bars::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.12) 20%,
+    rgba(255, 255, 255, 0.12) 80%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+.rpe-bar-cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+.rpe-bar-fill {
+  width: 100%;
+  border-radius: 2px;
+  transition: height 250ms ease;
+  position: absolute;
+  left: 0;
+  right: 0;
+}
+.rpe-bar-fill.up {
+  bottom: 50%;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 211, 123, 0.95) 0%,
+    rgba(255, 158, 60, 0.55) 100%
+  );
+  box-shadow: 0 0 8px rgba(255, 211, 123, 0.3);
+}
+.rpe-bar-fill.down {
+  top: 50%;
+  background: linear-gradient(
+    180deg,
+    rgba(204, 58, 58, 0.55) 0%,
+    rgba(204, 58, 58, 0.95) 100%
+  );
+  box-shadow: 0 0 8px rgba(204, 58, 58, 0.3);
+}
+.rpe-bar-cell.fresh .rpe-bar-fill {
+  animation: rpe-bar-pulse 1.4s ease-out 1;
+}
+@keyframes rpe-bar-pulse {
+  0% { filter: brightness(2) saturate(1.6); transform: scaleY(0); transform-origin: center; }
+  40% { filter: brightness(1.5) saturate(1.3); transform: scaleY(1); }
+  100% { filter: brightness(1) saturate(1); transform: scaleY(1); }
+}
+
+/* Learning Telemetry block: aggregate brain stats. The Q-table heatmap
+   above this block shows the WHERE; this block shows the SHAPE of
+   what's been learned. Coverage bar + 4 stats. */
+.learning-block {
+  border-color: rgba(255, 211, 123, 0.18);
+  background: linear-gradient(180deg, rgba(255, 211, 123, 0.04), rgba(7, 10, 14, 0.5));
+}
+.learn-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.learn-bar-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+}
+.learn-bar-head span:last-child {
+  color: var(--gold);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+.learn-bar-track {
+  position: relative;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+.learn-bar-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 211, 123, 0.95) 0%,
+    rgba(255, 158, 60, 0.95) 100%
+  );
+  box-shadow: 0 0 14px rgba(255, 211, 123, 0.4);
+  transition: width 360ms cubic-bezier(0.2, 0.8, 0.2, 1), background 240ms ease;
+  border-radius: 3px;
+}
+.learn-bar-fill.advanced {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 211, 123, 0.95) 0%,
+    rgba(91, 225, 192, 0.95) 100%
+  );
+  box-shadow: 0 0 14px rgba(91, 225, 192, 0.35);
+}
+.learning-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+  margin: 0;
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.32);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.learning-metrics div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.learning-metrics dt {
+  margin: 0;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+}
+.learning-metrics dd {
+  margin: 0;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.learning-metrics dd.gold { color: var(--gold); }
+.learning-metrics dd.accent { color: var(--accent); }
+#learning-coverage-pill {
+  color: var(--gold);
+}
+
+/* Block caption quote variant: italic, gold-leaning lead-in for the
+   memory grid + belief histogram. Same caption slot, just dressed
+   for the story. */
+.block-caption-quote {
+  font-style: italic;
+  color: #d8c89a;
+  font-size: 12px;
+  line-height: 1.5;
+  letter-spacing: 0.005em;
+}
+.block-caption-quote .caption-attr {
+  font-style: normal;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 211, 123, 0.5);
+  margin-left: 4px;
+}
+
+/* Memory grid (Q-table heatmap) -------------------------------------- */
+
+.memory-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.memory-header,
+.memory-row {
+  display: grid;
+  grid-template-columns: 72px repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  align-items: stretch;
+}
+
+.memory-header-pocket,
+.memory-row-label {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+  padding: 4px 6px;
+  display: flex;
+  align-items: center;
+}
+
+.memory-row-label {
+  color: var(--muted);
+}
+
+.memory-header-bank {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+  text-align: center;
+  padding: 4px 0;
+}
+
+.memory-cell {
+  --confidence: 0;
+  position: relative;
+  background: rgba(15, 20, 28, 0.7);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 7px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: pointer;
+  transition: border-color 160ms ease, transform 100ms ease, background 200ms ease;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  color: var(--muted-2);
+  min-height: 44px;
+}
+
+.memory-cell:hover {
+  border-color: var(--line-strong);
+  transform: translateY(-1px);
+}
+
+.memory-cell.trained {
+  border-color: rgba(91, 225, 192, calc(0.35 + 0.45 * var(--confidence)));
+  color: var(--accent);
+  background: linear-gradient(
+    180deg,
+    rgba(91, 225, 192, calc(0.08 + 0.18 * var(--confidence))),
+    rgba(91, 225, 192, calc(0.02 + 0.06 * var(--confidence)))
+  );
+  box-shadow: 0 0 14px rgba(91, 225, 192, calc(0.05 + 0.15 * var(--confidence)));
+}
+
+.memory-cell.aiming {
+  border-color: var(--gold);
+  box-shadow: 0 0 18px rgba(255, 211, 123, 0.4);
+}
+
+/* The Q-row being written RIGHT NOW. Pulses amber/orange so the user
+   can see which cell of the Q-table the cinematic is updating, tying
+   the on-felt show to the dashboard. */
+.memory-cell.training-now {
+  border-color: rgba(255, 188, 90, 0.85);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 178, 84, 0.28),
+    rgba(255, 178, 84, 0.08)
+  );
+  color: #ffe6c2;
+  animation: memory-cell-pulse 1.1s ease-in-out infinite;
+  z-index: 1;
+}
+.memory-cell.training-now::before {
+  content: "WRITING";
+  position: absolute;
+  top: -7px;
+  left: 4px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 7.5px;
+  letter-spacing: 0.14em;
+  color: #ffe6c2;
+  background: var(--bg-0);
+  padding: 1px 4px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 188, 90, 0.75);
+  text-shadow: 0 0 8px rgba(255, 178, 84, 0.4);
+}
+@keyframes memory-cell-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 14px rgba(255, 178, 84, 0.35),
+      inset 0 0 8px rgba(255, 178, 84, 0.18);
+  }
+  50% {
+    box-shadow:
+      0 0 22px rgba(255, 178, 84, 0.75),
+      inset 0 0 14px rgba(255, 178, 84, 0.32);
+  }
+}
+
+.memory-cell.native {
+  box-shadow: 0 0 0 1px rgba(255, 211, 123, 0.7) inset,
+    0 0 14px rgba(255, 211, 123, 0.25);
+}
+
+.memory-cell.native::after {
+  content: "NATIVE";
+  position: absolute;
+  top: -7px;
+  right: 4px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 7.5px;
+  letter-spacing: 0.12em;
+  color: var(--gold);
+  background: var(--bg-0);
+  padding: 1px 4px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 211, 123, 0.55);
+}
+
+.memory-cell-angle {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.memory-cell-visits {
+  font-size: 9px;
+  color: var(--muted-2);
+  letter-spacing: 0.04em;
+}
+
+.memory-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  margin-top: 2px;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+.legend-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.key-square {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+.key-empty {
+  background: rgba(15, 20, 28, 0.7);
+  border: 1px solid var(--line);
+}
+
+.key-trained {
+  background: linear-gradient(180deg, rgba(91, 225, 192, 0.35), rgba(91, 225, 192, 0.1));
+  border: 1px solid rgba(91, 225, 192, 0.55);
+}
+
+.key-aim {
+  background: transparent;
+  border: 1px solid var(--gold);
+  box-shadow: 0 0 6px rgba(255, 211, 123, 0.5);
+}
+
+.key-native {
+  background: transparent;
+  border: 1px solid rgba(255, 211, 123, 0.7);
+  box-shadow: 0 0 0 1px rgba(255, 211, 123, 0.4) inset;
+}
+
+/* Belief histogram ---------------------------------------------------- */
+
+.belief-block {
+  border-color: rgba(91, 225, 192, 0.12);
+}
+
+.belief-histogram {
+  width: 100%;
+  height: 110px;
+  display: block;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+}
+
+.metrics-tight {
+  grid-template-columns: 1fr 1fr;
+  gap: 0 14px;
+}
+
+.metrics-tight div {
+  padding: 6px 0;
+}
+
+.metrics-tight dt {
+  font-size: 10px;
+}
+
+.metrics-tight dd {
+  font-size: 12px;
+}
+
+.status-yes {
+  color: var(--accent-strong);
+}
+
+/* Training block (only visible during cinematic) ---------------------- */
+
+.training-block {
+  border-color: rgba(255, 188, 90, 0.35);
+  background: linear-gradient(180deg, rgba(255, 178, 84, 0.05), rgba(7, 10, 14, 0.6));
+  box-shadow: 0 0 24px rgba(255, 178, 84, 0.08);
+}
+
+.training-block .panel-foot { margin-top: 4px; }
+
+/* ---- Training metric blocks (eps + convergence bars) ---- */
+
+.train-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  margin: 8px 0;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 188, 90, 0.18);
+  background: rgba(7, 10, 14, 0.55);
+}
+
+.train-metric-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.train-metric-label {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 198, 110, 0.85);
+}
+
+.train-metric-value {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffe6c2;
+  text-shadow: 0 0 10px rgba(255, 178, 84, 0.45);
+  font-variant-numeric: tabular-nums;
+}
+
+.train-bar {
+  position: relative;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(7, 10, 14, 0.6);
+  border: 1px solid rgba(255, 188, 90, 0.15);
+  overflow: hidden;
+}
+
+.train-bar-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  border-radius: 999px;
+  transition: width 180ms cubic-bezier(.2,.9,.3,1.05);
+}
+
+.epsilon-bar .train-bar-fill {
+  /* Hot chaotic gradient for "still exploring" - it cools as it shrinks */
+  background: linear-gradient(
+    90deg,
+    rgba(255, 120, 60, 0.95),
+    rgba(255, 200, 90, 0.95) 60%,
+    rgba(255, 240, 180, 1)
+  );
+  background-size: 200% 100%;
+  animation: train-bar-shimmer 1.6s linear infinite;
+  box-shadow: 0 0 12px rgba(255, 178, 84, 0.7);
+}
+
+.converge-bar .train-bar-fill {
+  /* Cool->gold as the spike tightens */
+  background: linear-gradient(
+    90deg,
+    rgba(120, 200, 220, 0.9),
+    rgba(255, 220, 140, 1)
+  );
+  box-shadow: 0 0 12px rgba(255, 220, 140, 0.6);
+}
+
+@keyframes train-bar-shimmer {
+  0%   { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+.train-metric-foot {
+  display: flex;
+  justify-content: space-between;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 198, 110, 0.45);
+}
+
+.train-tally {
+  grid-template-columns: 1fr 1fr 1fr;
+  margin-top: 6px;
+  gap: 0 12px;
+}
+.train-tally div {
+  padding: 4px 0;
+}
+.train-tally dt {
+  font-size: 9px;
+  color: rgba(255, 198, 110, 0.6);
+}
+.train-tally dd {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 13px;
+  color: #ffe6c2;
+  font-variant-numeric: tabular-nums;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+}
+
+.metrics {
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 18px;
+}
+
+.metrics div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--line);
+}
+
+.metrics dt {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted-2);
+}
+
+.metrics dd {
+  margin: 0;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.spark-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgba(7, 10, 14, 0.5);
+}
+
+.spark-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.spark-label span:last-child {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.rpe-bar {
+  position: relative;
+  height: 6px;
+  border-radius: 999px;
+  background: #1a212b;
+  overflow: hidden;
+}
+
+#ps-rpe-fill {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 0;
+  height: 100%;
+  background: var(--accent-strong);
+  border-radius: 999px;
+  transform: translateX(0);
+  transition: width 350ms ease, background 350ms ease, transform 350ms ease;
+}
+
+#ps-rpe-fill.negative {
+  background: var(--danger);
+}
+
+.spark {
+  width: 100%;
+  height: 56px;
+  display: block;
+  border-radius: 8px;
+  background: rgba(7, 10, 14, 0.5);
+}
+
+.panel-foot {
+  display: flex;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.ghost-btn {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  color: var(--text);
+  border-radius: 12px;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  transition: all 160ms ease;
+}
+
+.ghost-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.ghost-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.ghost-btn.danger-btn {
+  color: var(--danger);
+  border-color: rgba(255, 107, 107, 0.4);
+  background: rgba(255, 107, 107, 0.06);
+}
+.ghost-btn.danger-btn:hover:not(:disabled) {
+  background: rgba(255, 107, 107, 0.14);
+  border-color: rgba(255, 107, 107, 0.7);
+  color: #ffd0d0;
+}
+
+/* -------------------------------------------------------------------- */
+/* cinematic overlay (on the table)                                      */
+/*                                                                       */
+/* The felt overlay is now intentionally minimal: a slim glowing         */
+/* progress strip at the top of the table and a "locked in" flash that  */
+/* triggers when training completes. All status text (eyebrow, episode  */
+/* count, caption) lives in the right-rail training block so the felt   */
+/* never carries paragraphs of text during training.                    */
+/* -------------------------------------------------------------------- */
+
+.cinematic {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(420px, 70%);
+  pointer-events: none;
+  z-index: 4;
+}
+
+/* In-rail inline caption that replaces the on-felt caption block.    */
+.cine-caption-inline {
+  font-style: italic;
+  color: #ffe6c2;
+  letter-spacing: 0.01em;
+  text-shadow: 0 0 12px rgba(255, 178, 84, 0.18);
+  margin: 0 0 8px;
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+#cine-caption.cine-caption-fade {
+  opacity: 0;
+  transform: translateY(2px);
+}
+.block-caption-mute {
+  color: rgba(247, 247, 252, 0.55);
+  font-size: 11.5px;
+  margin: 0 0 10px;
+}
+
+.cine-progress {
+  position: relative;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 178, 84, 0.14);
+  overflow: hidden;
+  box-shadow:
+    0 0 14px rgba(255, 178, 84, 0.22),
+    inset 0 0 6px rgba(255, 178, 84, 0.18);
+}
+
+#cine-progress-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 178, 84, 0.6),
+    rgba(255, 220, 150, 1) 50%,
+    rgba(255, 178, 84, 0.6)
+  );
+  background-size: 200% 100%;
+  transition: width 200ms linear;
+  box-shadow: 0 0 14px rgba(255, 178, 84, 0.7);
+  animation: cine-progress-shimmer 2.4s linear infinite;
+}
+@keyframes cine-progress-shimmer {
+  0%   { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+.cinematic:not(.hidden) {
+  animation: cine-enter 420ms cubic-bezier(.2,.9,.3,1.05) both;
+}
+@keyframes cine-enter {
+  0%   { opacity: 0; transform: translate(-50%, -10px) scale(0.965); }
+  100% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}
+.cinematic.leaving {
+  animation: cine-leave 280ms ease-in both !important;
+}
+@keyframes cine-leave {
+  0%   { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -6px) scale(0.98); }
+}
+.cinematic.locked-in #cine-progress-fill {
+  background: var(--gold);
+  box-shadow: 0 0 18px rgba(255, 211, 123, 0.7);
+}
+
+/* The "Locked in" flash is the single piece of cinematic text that
+   remains on the felt - it appears for a beat the moment training
+   completes successfully, then fades. It's not a card, it's a
+   centered shimmer. */
+.cine-locked-in {
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  opacity: 0;
+  pointer-events: none;
+  padding: 10px 22px;
+  border-radius: 999px;
+  background: rgba(7,10,14,0.72);
+  border: 1px solid rgba(255, 211, 123, 0.45);
+  backdrop-filter: blur(6px);
+  transition: opacity 320ms ease;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-size: 12px;
+  color: var(--gold);
+  box-shadow: 0 0 32px rgba(255, 211, 123, 0.22);
+}
+.cinematic.locked-in .cine-locked-in {
+  opacity: 1;
+}
+.cine-locked-glyph {
+  font-size: 18px;
+  text-shadow: 0 0 14px rgba(255, 211, 123, 0.7);
+  animation: locked-pulse 1.6s ease-in-out infinite;
+}
+@keyframes locked-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.85; }
+  50%      { transform: scale(1.18); opacity: 1; }
+}
+
+/* ===========================================================
+   Sanctum / Dr Strange scenario overlay
+   =========================================================== */
+
+.sanctum {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr auto;
+  align-items: center;
+  justify-items: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 320ms ease;
+  z-index: 25;
+}
+
+.sanctum:not(.hidden) {
+  opacity: 1;
+}
+
+.table-wrap.sanctum-mode {
+  background: radial-gradient(
+    circle at 50% 45%,
+    rgba(255, 158, 60, 0.25) 0%,
+    rgba(20, 12, 6, 0.92) 65%
+  );
+}
+
+.table-wrap.sanctum-mode canvas {
+  filter: hue-rotate(-30deg) saturate(1.05) brightness(1.02);
+}
+
+.sanctum-sigil {
+  grid-row: 1 / 2;
+  position: relative;
+  width: 280px;
+  height: 280px;
+  margin-top: 40px;
+}
+
+.sigil-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 178, 84, 0.55);
+  box-shadow: 0 0 24px rgba(255, 158, 60, 0.45) inset,
+              0 0 24px rgba(255, 158, 60, 0.25);
+  animation-name: sigil-spin;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.sigil-ring::before,
+.sigil-ring::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  border: 1px dashed rgba(255, 198, 110, 0.35);
+}
+
+.sigil-ring::after {
+  inset: 14px;
+  border-style: dotted;
+  border-color: rgba(255, 198, 110, 0.22);
+}
+
+.sigil-ring-outer { animation-duration: 8s; }
+.sigil-ring-mid {
+  inset: 28px;
+  border-width: 1px;
+  border-color: rgba(255, 198, 110, 0.65);
+  animation-duration: 5s;
+  animation-direction: reverse;
+}
+.sigil-ring-inner {
+  inset: 56px;
+  border-color: rgba(255, 220, 150, 0.85);
+  animation-duration: 3s;
+  box-shadow: 0 0 32px rgba(255, 188, 90, 0.55) inset,
+              0 0 32px rgba(255, 188, 90, 0.4);
+}
+
+@keyframes sigil-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.sanctum-text {
+  grid-row: 2 / 3;
+  width: min(620px, 90%);
+  text-align: center;
+  margin-bottom: 36px;
+  padding: 16px 22px;
+  background: rgba(20, 12, 6, 0.55);
+  border: 1px solid rgba(255, 178, 84, 0.35);
+  border-radius: 12px;
+  backdrop-filter: blur(6px);
+}
+
+.sanctum-eyebrow {
+  margin: 0;
+  font-size: 10px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(255, 198, 110, 0.85);
+}
+
+.sanctum-counter {
+  margin: 6px 0 12px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 22px;
+  font-weight: 600;
+  color: #fff1d8;
+  letter-spacing: 0.16em;
+  text-shadow: 0 0 18px rgba(255, 178, 84, 0.6);
+}
+
+.sanctum-quote {
+  margin: 0 0 6px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #ffe6c2;
+  font-style: italic;
+}
+
+.sanctum-attribution {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 198, 110, 0.7);
+}
+
+/* ===========================================================
+   Cinematic training mode - Dr Strange casting energy
+   =========================================================== */
+
+.table-wrap.cinematic-mode {
+  background:
+    radial-gradient(
+      circle at 50% 45%,
+      rgba(255, 158, 60, 0.22) 0%,
+      rgba(255, 100, 40, 0.08) 35%,
+      rgba(8, 10, 14, 0.95) 75%
+    );
+  transition: background 600ms ease;
+}
+
+.table-wrap.cinematic-mode canvas {
+  filter: hue-rotate(-12deg) saturate(1.08) brightness(1.04) contrast(1.04);
+  transition: filter 600ms ease;
+}
+
+.table-wrap.cinematic-mode::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      circle at 50% 50%,
+      transparent 30%,
+      rgba(255, 158, 60, 0.06) 55%,
+      transparent 80%
+    );
+  mix-blend-mode: screen;
+  animation: cine-aura 4s ease-in-out infinite;
+  z-index: 1;
+}
+@keyframes cine-aura {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50%      { opacity: 0.9; transform: scale(1.04); }
+}
+
+/* -------------------------------------------------------------------- */
+/* responsive                                                            */
+/* -------------------------------------------------------------------- */
+
+@media (max-width: 1080px) {
+  .topbar {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .loop {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+  .topbar-actions {
+    justify-self: start;
+    flex-wrap: wrap;
+  }
+  .stage {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  .table-wrap {
+    height: min(calc(100vh - 220px), 720px);
+    max-width: 480px;
+  }
+  .panel {
+    max-height: none;
+    height: auto;
+  }
+}
+
+@media (max-width: 560px) {
+  .stage { padding: 16px; }
+  .panel { padding: 14px; gap: 10px; }
+  .block { padding: 10px 12px; }
+  .table-wrap { height: 80vh; }
+  .memory-header,
+  .memory-row { grid-template-columns: 56px repeat(4, minmax(0, 1fr)); }
+  .verdict-metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+/* -------------------------------------------------------------------- */
+/* floating help button                                                  */
+/* -------------------------------------------------------------------- */
+
+/* Help button now lives in the topbar next to "Teach this shot" instead
+   of floating over the felt. Small icon + label, ghosted so it never
+   competes with the primary action visually. */
+
+.help-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px 7px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: rgba(13, 17, 23, 0.6);
+  color: var(--muted);
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: border-color 160ms ease, color 160ms ease, background 160ms ease;
+}
+.help-btn:hover {
+  border-color: rgba(91, 225, 192, 0.45);
+  color: var(--text);
+  background: rgba(13, 17, 23, 0.85);
+}
+.help-btn:focus-visible {
+  outline: 2px solid var(--accent-strong);
+  outline-offset: 2px;
+}
+.help-glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid rgba(91, 225, 192, 0.45);
+  background: rgba(91, 225, 192, 0.08);
+  color: var(--accent);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
+.help-text {
+  text-transform: uppercase;
+}
+
+/* -------------------------------------------------------------------- */
+/* tips modal                                                            */
+/* -------------------------------------------------------------------- */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 6, 10, 0.78);
+  backdrop-filter: blur(8px) saturate(120%);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 50;
+  animation: modal-fade 200ms ease-out;
+}
+.modal-backdrop.hidden { display: none; }
+.modal {
+  position: relative;
+  width: min(960px, 100%);
+  max-height: 88vh;
+  overflow-y: auto;
+  background: linear-gradient(180deg, #0f141d 0%, #0a0e15 100%);
+  border: 1px solid var(--line-strong);
+  border-radius: 22px;
+  padding: 30px 34px 24px;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(91, 225, 192, 0.15) inset;
+  animation: modal-rise 280ms cubic-bezier(.2, .9, .3, 1.05);
+}
+.modal h2 {
+  margin: 4px 0 18px;
+  font-size: 24px;
+  letter-spacing: 0.01em;
+}
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 160ms, background 160ms, border-color 160ms;
+}
+.modal-close:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--accent-strong);
+}
+.modal-foot {
+  margin: 18px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.tips-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+@media (max-width: 720px) {
+  .tips-grid { grid-template-columns: 1fr; }
+  .modal { padding: 24px 18px 18px; }
+}
+.tip-card {
+  background: rgba(8, 11, 16, 0.7);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.tip-card h3 {
+  margin: 4px 0 2px;
+  font-size: 16px;
+  color: var(--accent);
+}
+.tip-card p {
+  margin: 0;
+  color: var(--text);
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+.tip-card p.tip-note {
+  color: var(--muted);
+  font-size: 12.5px;
+  border-top: 1px dashed var(--line-strong);
+  padding-top: 8px;
+  margin-top: 4px;
+}
+.tip-card strong { color: var(--gold); font-weight: 600; }
+.tip-card em { color: var(--accent-strong); font-style: normal; }
+.tip-diagram {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tip-diagram svg { width: 100%; height: auto; max-height: 130px; display: block; }
+.narrative-card {
+  background: linear-gradient(180deg, rgba(91, 225, 192, 0.08), rgba(91, 225, 192, 0.02));
+  border-color: rgba(91, 225, 192, 0.3);
+}
+
+@keyframes modal-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes modal-rise {
+  0% { transform: translateY(20px) scale(0.97); opacity: 0; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+/* -------------------------------------------------------------------- */
+/* graceful transitions: stage toast, felt pulse, memory wipe sweep,    */
+/* wipe-memory modal                                                    */
+/* -------------------------------------------------------------------- */
+
+/* Felt-level pulse: a soft radial wave that fires at the cue ball
+   when the cinematic opens and again when the agent racks. */
+.felt-pulse {
+  position: absolute;
+  left: 50%;
+  top: 85%;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  border-radius: 50%;
+  border: 1px solid rgba(91, 225, 192, 0.6);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+.felt-pulse.firing {
+  animation: felt-pulse-ring 900ms cubic-bezier(.2,.7,.3,1) 1;
+}
+.felt-pulse.gold.firing {
+  border-color: rgba(255, 211, 123, 0.75);
+  animation-name: felt-pulse-ring-gold;
+}
+@keyframes felt-pulse-ring {
+  0%   { transform: scale(0.4); opacity: 0.9; border-width: 2px; }
+  60%  { opacity: 0.4; }
+  100% { transform: scale(22); opacity: 0; border-width: 0.5px; }
+}
+@keyframes felt-pulse-ring-gold {
+  0%   { transform: scale(0.4); opacity: 0.95; border-width: 2px;
+         box-shadow: 0 0 30px rgba(255,211,123,0.7); }
+  60%  { opacity: 0.45; }
+  100% { transform: scale(26); opacity: 0; border-width: 0.5px;
+         box-shadow: 0 0 0 rgba(255,211,123,0); }
+}
+
+/* Stage toast: brief inline message over the felt */
+.stage-toast {
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(7, 10, 14, 0.92);
+  border: 1px solid rgba(91, 225, 192, 0.45);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none;
+  z-index: 20;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.45);
+}
+.stage-toast.hidden { display: none; }
+.stage-toast:not(.hidden) {
+  animation: stage-toast-life 2200ms cubic-bezier(.2,.9,.3,1.05) both;
+}
+@keyframes stage-toast-life {
+  0%   { opacity: 0; transform: translate(-50%, -10px); }
+  18%  { opacity: 1; transform: translate(-50%, 0); }
+  82%  { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, -6px); }
+}
+.stage-toast.danger {
+  border-color: rgba(255, 107, 107, 0.55);
+  color: #ffd0d0;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.55), 0 0 18px rgba(255,107,107,0.25);
+}
+.stage-toast.gold {
+  border-color: rgba(255, 211, 123, 0.65);
+  color: var(--gold);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.45), 0 0 22px rgba(255,211,123,0.28);
+}
+.stage-toast-glyph {
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* Memory grid wipe sweep ---------------------------------------------- */
+
+.memory-cell {
+  transition:
+    border-color 220ms ease,
+    background 280ms ease,
+    color 220ms ease,
+    box-shadow 280ms ease,
+    transform 220ms ease,
+    opacity 260ms ease;
+}
+.memory-cell.wiping {
+  animation: memory-cell-wipe 520ms cubic-bezier(.4,0,.2,1) forwards;
+}
+@keyframes memory-cell-wipe {
+  0%   { transform: scale(1); opacity: 1;
+         box-shadow: 0 0 28px rgba(255,107,107,0.55),
+                     0 0 0 1px rgba(255,107,107,0.6) inset; }
+  60%  { transform: scale(0.9); opacity: 0.25; }
+  100% { transform: scale(1); opacity: 1;
+         box-shadow: 0 0 0 rgba(0,0,0,0); }
+}
+.memory-grid.wiping .memory-cell {
+  pointer-events: none;
+}
+
+/* Wipe-memory modal --------------------------------------------------- */
+
+.wipe-backdrop {
+  background: rgba(8, 4, 4, 0.72);
+}
+.wipe-modal {
+  width: min(520px, 100%);
+  padding: 28px 30px 22px;
+  border: 1px solid rgba(255, 107, 107, 0.32);
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(255, 107, 107, 0.18) inset,
+    0 0 60px rgba(255, 107, 107, 0.06);
+}
+.wipe-eyebrow {
+  color: rgba(255, 158, 60, 0.85);
+}
+.wipe-modal h2 {
+  margin: 6px 0 12px;
+  font-size: 22px;
+  color: var(--text);
+}
+.wipe-lede {
+  margin: 0 0 14px;
+  color: var(--muted);
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+.wipe-list {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  list-style: none;
+  background: rgba(255, 107, 107, 0.06);
+  border: 1px solid rgba(255, 107, 107, 0.22);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.wipe-list li {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 12px;
+  color: #ffd0d0;
+  letter-spacing: 0.04em;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.wipe-list-glyph {
+  color: rgba(255, 107, 107, 0.85);
+  font-size: 13px;
+}
+.wipe-aside {
+  margin: 0 0 18px;
+  font-size: 12px;
+  color: var(--muted-2);
+  font-style: italic;
+}
+.wipe-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+.wipe-actions .ghost-btn {
+  flex: 0 0 auto;
+  min-width: 120px;
+}
+.primary-danger-btn {
+  background: linear-gradient(180deg, rgba(255, 107, 107, 0.28), rgba(255, 107, 107, 0.08));
+  border-color: rgba(255, 107, 107, 0.65) !important;
+  color: #ffe0e0 !important;
+  font-weight: 600;
+}
+.primary-danger-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, rgba(255, 107, 107, 0.42), rgba(255, 107, 107, 0.16)) !important;
+  box-shadow: 0 0 22px rgba(255, 107, 107, 0.28);
+}

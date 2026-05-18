@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ title }}</title>
+    <link
+      rel="preconnect"
+      href="https://fonts.googleapis.com"
+      crossorigin
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/styles.css?v={{ asset_v }}" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand-stack">
+        <div class="brand">
+          <span class="brand-dot"></span>
+          <span>Running the Table</span>
+        </div>
+        <p class="constitution">
+          Hold the model firmly enough to act on it. Loosely enough to update it.<br />
+          Nobody really knows what they&rsquo;re doing. Some are just better at updating.
+        </p>
+      </div>
+      <ol class="loop" id="loop-strip">
+        <li data-step="belief"><span>1</span> belief</li>
+        <li data-step="guess"><span>2</span> guess</li>
+        <li data-step="move"><span>3</span> move</li>
+        <li data-step="reality"><span>4</span> reality</li>
+        <li data-step="surprise"><span>5</span> surprise</li>
+        <li data-step="sharper belief"><span>6</span> sharper belief</li>
+      </ol>
+      <div class="topbar-actions">
+        <button id="watch-btn" class="watch-btn" disabled title="Aim into a pocket, then teach the agent this exact shot">
+          Teach this shot
+        </button>
+        <button id="help-fab" class="help-btn" title="Real pool tips" aria-label="Open pool tips">
+          <span class="help-glyph">?</span>
+          <span class="help-text">Pool tips</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="stage">
+      <section class="table-wrap">
+        <canvas id="table-canvas"></canvas>
+
+        <!-- Training cinematic overlay: ONLY a slim progress bar and
+             a locked-in flash. All status text now lives in the right
+             rail training block so the felt itself stays uncluttered
+             during training. -->
+        <div id="cinematic" class="cinematic cinematic-slim hidden">
+          <div class="cine-progress">
+            <div id="cine-progress-fill"></div>
+          </div>
+          <div id="cine-locked-in" class="cine-locked-in" aria-hidden="true">
+            <span class="cine-locked-glyph">&#10038;</span>
+            <span class="cine-locked-text">Locked in</span>
+          </div>
+        </div>
+
+        <!-- Felt-level "scan" pulse used on cinematic enter and racks -->
+        <div id="felt-pulse" class="felt-pulse" aria-hidden="true"></div>
+
+        <!-- Brief inline toast (slides in over the table, auto-dismisses) -->
+        <div id="stage-toast" class="stage-toast hidden" aria-live="polite">
+          <span class="stage-toast-glyph">&#9670;</span>
+          <span class="stage-toast-text"></span>
+        </div>
+
+        <!-- Sanctum / Dr Strange scenario overlay (auto-triggered after OOD miss) -->
+        <div id="sanctum" class="sanctum hidden" aria-hidden="true">
+          <div class="sanctum-sigil">
+            <div class="sigil-ring sigil-ring-outer"></div>
+            <div class="sigil-ring sigil-ring-mid"></div>
+            <div class="sigil-ring sigil-ring-inner"></div>
+          </div>
+          <div class="sanctum-text">
+            <p class="sanctum-eyebrow">Running simulations forward</p>
+            <p id="sanctum-counter" class="sanctum-counter">FUTURE 0 / 1000</p>
+            <p id="sanctum-quote" class="sanctum-quote">
+              Running every shot it has never taken.
+            </p>
+            <p id="sanctum-attribution" class="sanctum-attribution">PRIORS COMPILING</p>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel" id="panel">
+
+        <!-- NARRATOR + VERDICT (single locked-height card) -->
+        <section class="block narrator-block">
+          <p class="eyebrow">The Narrator</p>
+          <h2 id="phase-title">awaiting shot</h2>
+          <p id="narrator" class="narrator">
+            Cue ball is locked at (50, 30). Move the cue to aim. The trajectory picks the pocket. Click <strong>Teach this shot</strong> to imprint the Q-row, or click any pocket to test what the agent already knows.
+          </p>
+
+          <!-- Live aim readout - replaces the old on-felt CUE LOCKED /
+               D1.2 / HEAD STRING text labels that were cluttering the
+               table. Same numbers, just out where they can breathe. -->
+          <div class="aim-readout" id="aim-readout">
+            <div class="aim-cell">
+              <span class="aim-key">Cue</span>
+              <span class="aim-val" id="aim-cue">D1.2</span>
+            </div>
+            <div class="aim-cell">
+              <span class="aim-key">Target</span>
+              <span class="aim-val" id="aim-target">&mdash;</span>
+            </div>
+            <div class="aim-cell">
+              <span class="aim-key">Angle</span>
+              <span class="aim-val" id="aim-angle">&mdash;</span>
+            </div>
+            <div class="aim-cell">
+              <span class="aim-key">Banks</span>
+              <span class="aim-val" id="aim-banks">&mdash;</span>
+            </div>
+          </div>
+
+          <p class="narrator-gestures" id="narrator-gestures">
+            <span class="ng-item ng-aim"><span class="ng-key">&#9678;</span> click pocket = call shot</span>
+            <span class="ng-item ng-frozen"><span class="ng-key">&#8635;</span> click path = replay</span>
+            <span class="ng-item ng-frozen"><span class="ng-key">&#8634;</span> click felt = rack</span>
+          </p>
+
+          <!-- Single-line CTA: what should the user do next? Lives
+               here in the right rail so the felt itself stays free of
+               text. Updated by app.js in lockstep with the narrator
+               paragraph. -->
+          <p id="hint" class="narrator-cta">Click any pocket to call the shot.</p>
+
+          <!-- Verdict region: same DOM nodes whether aiming or frozen.
+               When idle, the metrics row is greyed out. When frozen,
+               the row populates with miss/bounces/reward/RPE. Height
+               is fixed so the rail never reflows. -->
+          <div class="verdict-region" id="verdict-region">
+            <dl class="verdict-metrics" id="verdict-metrics">
+              <div><dt>Miss</dt><dd id="ps-miss">&mdash;</dd></div>
+              <div><dt>Bounces</dt><dd id="ps-bounces">&mdash;</dd></div>
+              <div><dt>Reward</dt><dd id="ps-reward">&mdash;</dd></div>
+              <div><dt>RPE</dt><dd id="ps-rpe-value">&mdash;</dd></div>
+            </dl>
+            <div class="rpe-bar"><div id="ps-rpe-fill"></div></div>
+
+            <!-- Reward Prediction Error history: small vertical bars
+                 representing the last 12 shots. Gold-up = positive RPE
+                 (made better than expected). Crimson-down = negative
+                 RPE (missed worse than expected). Dopamine literally
+                 IS this signal in your head. -->
+            <div class="rpe-history" id="rpe-history" aria-label="Recent reward prediction errors">
+              <p class="rpe-history-eyebrow">
+                <span>Reward Prediction Error &middot; last 12</span>
+                <span class="rpe-history-hint">dopamine = surprise &times; magnitude</span>
+              </p>
+              <div class="rpe-history-bars" id="rpe-history-bars"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- AGENT'S MEMORY - Q-TABLE HEATMAP -->
+        <section class="block memory-block">
+          <div class="block-head">
+            <p class="eyebrow">Agent's Memory &middot; Q-table</p>
+            <span id="memory-count" class="mono-pill">0 variants</span>
+            <div class="block-kebab-wrap">
+              <button
+                id="memory-kebab"
+                class="block-kebab"
+                type="button"
+                aria-haspopup="true"
+                aria-expanded="false"
+                aria-label="Memory options"
+                title="Memory options"
+              >&#8943;</button>
+              <div id="memory-kebab-menu" class="block-kebab-menu hidden" role="menu" aria-hidden="true">
+                <button id="wipe-memory" class="kebab-item danger" type="button" role="menuitem">
+                  <span class="kebab-glyph">&#9003;</span>
+                  Wipe agent memory
+                </button>
+              </div>
+            </div>
+          </div>
+          <p class="block-caption block-caption-quote">
+            Expertise is a Q-table you spent ten thousand hours filling in.
+            <span class="caption-attr">&mdash; each cell is one reflex.</span>
+          </p>
+          <div class="memory-grid" id="memory-grid"></div>
+          <div class="memory-legend">
+            <span class="legend-key"><i class="key-square key-empty"></i>untrained</span>
+            <span class="legend-key"><i class="key-square key-trained"></i>trained</span>
+            <span class="legend-key"><i class="key-square key-aim"></i>aiming here</span>
+            <span class="legend-key"><i class="key-square key-native"></i>native reflex</span>
+          </div>
+        </section>
+
+        <!-- CURRENT BELIEF - Q-ROW HISTOGRAM -->
+        <section class="block belief-block">
+          <div class="block-head">
+            <p class="eyebrow">Current Belief &middot; Q-row</p>
+            <span id="belief-variant" class="mono-pill">&mdash;</span>
+          </div>
+          <p class="block-caption" id="belief-caption">
+            180 angles. One Q-value each. Every successful shot pulls its angle up; every miss pushes it down. <em>You are not deciding &mdash; you are recognizing.</em>
+          </p>
+          <canvas id="belief-histogram" class="belief-histogram"></canvas>
+          <dl class="metrics metrics-tight">
+            <div>
+              <dt>Agent's best</dt>
+              <dd id="belief-best">&mdash;</dd>
+            </div>
+            <div>
+              <dt>Your aim</dt>
+              <dd id="belief-aim">&mdash;</dd>
+            </div>
+            <div>
+              <dt>Visits</dt>
+              <dd id="belief-visits">&mdash;</dd>
+            </div>
+            <div>
+              <dt>Trained?</dt>
+              <dd id="belief-status">no</dd>
+            </div>
+          </dl>
+        </section>
+
+        <!-- LEARNING TELEMETRY -- aggregate stats across the whole
+             Q-table. Shows the user what the agent has learned in
+             AGGREGATE: how many reflexes locked, how many dopamine
+             spikes have been written, which reflex is sharpest, and
+             how confident the average row is. -->
+        <section class="block learning-block">
+          <div class="block-head">
+            <p class="eyebrow">Learning &middot; Telemetry</p>
+            <span class="mono-pill" id="learning-coverage-pill">0%</span>
+          </div>
+          <p class="block-caption block-caption-quote">
+            Practice is neural landscaping.
+            <span class="caption-attr">&mdash; every visit is a dopamine spike that nudges a Q-value.</span>
+          </p>
+
+          <!-- Q-table coverage: how much of the 24-variant space is
+               written. The fill bar paints amber while learning and
+               turns accent-green once half the table is mapped. -->
+          <div class="learn-bar">
+            <div class="learn-bar-head">
+              <span>Q-table coverage</span>
+              <span id="learn-coverage-val">0 / 24</span>
+            </div>
+            <div class="learn-bar-track">
+              <div class="learn-bar-fill" id="learn-coverage-fill"></div>
+            </div>
+          </div>
+
+          <!-- Aggregate learning stats. dopamine spikes = sum of all
+               Q-row visits. sharpest = the variant with the steepest
+               peak-vs-mean gap. native reflex = the first row ever
+               trained. avg confidence = how peaked an average trained
+               row is (proxy for "how committed the brain is"). -->
+          <dl class="metrics learning-metrics">
+            <div><dt>Dopamine spikes</dt><dd id="learn-spikes">&mdash;</dd></div>
+            <div><dt>Sharpest reflex</dt><dd id="learn-sharpest">&mdash;</dd></div>
+            <div><dt>Native reflex</dt><dd id="learn-native">&mdash;</dd></div>
+            <div><dt>Avg. confidence</dt><dd id="learn-confidence">&mdash;</dd></div>
+          </dl>
+        </section>
+
+        <!-- TRAINING SIGNAL (only visible during active cinematic).
+             Hosts the cinematic eyebrow + episode counter + caption
+             that used to sit on top of the felt. -->
+        <section class="block training-block hidden" id="training-block">
+          <div class="block-head">
+            <p class="eyebrow" id="cine-eyebrow">Running simulations</p>
+            <span id="cine-status" class="mono-pill">Episode 0 / 0</span>
+          </div>
+          <p id="cine-caption" class="block-caption cine-caption-inline">Every future equally plausible. Spinning them up.</p>
+          <p class="block-caption block-caption-mute" id="cine-phase">Q-table starts at zero. Every angle equally plausible.</p>
+
+          <!-- EXPLORATION ε: chaos -> commitment, visible as a shrinking bar -->
+          <div class="train-metric">
+            <div class="train-metric-head">
+              <span class="train-metric-label">Exploration &epsilon;</span>
+              <span class="train-metric-value" id="cine-explore">&mdash;</span>
+            </div>
+            <div class="train-bar epsilon-bar">
+              <div class="train-bar-fill" id="epsilon-fill" style="width: 100%"></div>
+            </div>
+            <div class="train-metric-foot">
+              <span>random</span>
+              <span>greedy</span>
+            </div>
+          </div>
+
+          <!-- CONVERGENCE: how sharp is the Q-row spike on the demo angle -->
+          <div class="train-metric">
+            <div class="train-metric-head">
+              <span class="train-metric-label">Convergence on demo</span>
+              <span class="train-metric-value" id="cine-converge">0%</span>
+            </div>
+            <div class="train-bar converge-bar">
+              <div class="train-bar-fill" id="converge-fill" style="width: 0%"></div>
+            </div>
+            <div class="train-metric-foot">
+              <span>flat halo</span>
+              <span>single spike</span>
+            </div>
+          </div>
+
+          <!-- ATTEMPTS: try / fail / adjust live tally -->
+          <dl class="metrics metrics-tight train-tally">
+            <div><dt>Tries</dt><dd id="cine-tries">0</dd></div>
+            <div><dt>Makes</dt><dd id="cine-makes">0</dd></div>
+            <div><dt>Win rate</dt><dd id="cine-winrate">0%</dd></div>
+            <div><dt>First make</dt><dd id="cine-firstmake">&mdash;</dd></div>
+            <div><dt>Last angle</dt><dd id="cine-angle">&mdash;</dd></div>
+            <div><dt>Last reward</dt><dd id="cine-reward">&mdash;</dd></div>
+          </dl>
+
+          <div class="spark-block">
+            <div class="spark-label">
+              <span class="eyebrow">Rolling reward</span>
+              <span id="cine-reward-val">&mdash;</span>
+            </div>
+            <canvas id="reward-spark" class="spark"></canvas>
+          </div>
+          <div class="spark-block">
+            <div class="spark-label">
+              <span class="eyebrow">Rolling win rate</span>
+              <span id="cine-winrate-val">&mdash;</span>
+            </div>
+            <canvas id="winrate-spark" class="spark"></canvas>
+          </div>
+          <div class="panel-foot">
+            <button id="cine-pause-btn" class="ghost-btn">Pause</button>
+            <button id="cine-exit-btn" class="ghost-btn">Skip</button>
+          </div>
+        </section>
+
+      </aside>
+    </main>
+
+    <!-- Real Pool Physics modal: opens from the help FAB. Plain-language
+         primer so non-pool-players can read what's happening on the
+         felt without needing context outside the demo. -->
+    <div id="tips-modal" class="modal-backdrop hidden" aria-hidden="true">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="tips-title">
+        <button class="modal-close" id="tips-close" aria-label="Close">&times;</button>
+        <p class="eyebrow">Real Pool Physics &middot; A 90-second primer</p>
+        <h2 id="tips-title">How a cue ball actually moves</h2>
+
+        <div class="tips-grid">
+          <div class="tip-card">
+            <div class="tip-diagram cue-diagram">
+              <svg viewBox="0 0 120 120" aria-hidden="true">
+                <defs>
+                  <radialGradient id="cueball" cx="35%" cy="30%">
+                    <stop offset="0%" stop-color="#ffffff"/>
+                    <stop offset="60%" stop-color="#dadada"/>
+                    <stop offset="100%" stop-color="#9aa1aa"/>
+                  </radialGradient>
+                </defs>
+                <circle cx="60" cy="60" r="44" fill="url(#cueball)" stroke="#0b0b0b" stroke-width="0.5"/>
+                <circle cx="60" cy="24" r="4" fill="#5be1c0"/><text x="60" y="14" text-anchor="middle" fill="#5be1c0" font-size="9" font-family="JetBrains Mono">FOLLOW</text>
+                <circle cx="60" cy="96" r="4" fill="#ff9e3c"/><text x="60" y="112" text-anchor="middle" fill="#ff9e3c" font-size="9" font-family="JetBrains Mono">DRAW</text>
+                <circle cx="60" cy="60" r="4" fill="#d8fff5"/><text x="60" y="64" text-anchor="middle" fill="#0c1118" font-size="8" font-family="JetBrains Mono">STOP</text>
+                <circle cx="24" cy="60" r="4" fill="#ffd37b"/><text x="14" y="63" text-anchor="end" fill="#ffd37b" font-size="9" font-family="JetBrains Mono">L-ENG</text>
+                <circle cx="96" cy="60" r="4" fill="#ffd37b"/><text x="106" y="63" text-anchor="start" fill="#ffd37b" font-size="9" font-family="JetBrains Mono">R-ENG</text>
+              </svg>
+            </div>
+            <h3>Where you hit the white ball</h3>
+            <p>Strike <strong>dead center</strong> &rarr; ball stops on contact. Strike <strong>above center</strong> &rarr; ball <em>follows</em> through (top spin). Strike <strong>below center</strong> &rarr; ball comes back at you (<em>draw</em>, backspin). Strike <strong>side</strong> &rarr; english/spin tilts the cue ball's path off the rails.</p>
+            <p class="tip-note">This demo simplifies physics to a clean reflection &mdash; no spin &mdash; so you can see the agent's <em>angle</em> belief without it being confounded by english.</p>
+          </div>
+
+          <div class="tip-card">
+            <div class="tip-diagram bank-diagram">
+              <svg viewBox="0 0 140 90" aria-hidden="true">
+                <rect x="2" y="2" width="136" height="86" rx="6" fill="#0e2a26" stroke="#1f5a51" stroke-width="2"/>
+                <circle cx="20" cy="65" r="5" fill="#fff"/>
+                <line x1="20" y1="65" x2="100" y2="10" stroke="#5be1c0" stroke-dasharray="3,3" stroke-width="1.5"/>
+                <line x1="100" y1="10" x2="135" y2="55" stroke="#5be1c0" stroke-dasharray="3,3" stroke-width="1.5"/>
+                <circle cx="135" cy="55" r="4" fill="#ffd37b" stroke="#5be1c0"/>
+              </svg>
+            </div>
+            <h3>What a bank shot is</h3>
+            <p>The angle the cue ball <em>leaves</em> the rail equals the angle it <em>arrives</em> at &mdash; like light off a mirror. The agent's Q-row finds the one launch angle whose mirror line drops into the pocket. A <strong>2-bank</strong> shot uses two rails, a <strong>3-bank</strong> uses three.</p>
+            <p class="tip-note">The numbered diamonds on the rail are the same ones a real-table player uses for the diamond system. Read the trajectory's entry/exit diamond values like a real shot.</p>
+          </div>
+
+          <div class="tip-card">
+            <div class="tip-diagram">
+              <svg viewBox="0 0 140 90" aria-hidden="true">
+                <rect x="2" y="2" width="136" height="86" rx="6" fill="#0e2a26" stroke="#1f5a51" stroke-width="2"/>
+                <circle cx="30" cy="70" r="5" fill="#fff"/>
+                <line x1="30" y1="70" x2="80" y2="30" stroke="#ffd37b" stroke-dasharray="3,3" stroke-width="1.5"/>
+                <circle cx="80" cy="30" r="5" fill="#cc3a3a"/>
+                <line x1="80" y1="30" x2="135" y2="8" stroke="#ff9e3c" stroke-width="1.5"/>
+                <circle cx="135" cy="8" r="4" fill="#ffd37b"/>
+              </svg>
+            </div>
+            <h3>The cut angle</h3>
+            <p>When the cue ball strikes another ball, the target travels along the line connecting their two centers <em>at contact</em>. Aim the <em>ghost ball</em> spot, not the object ball. This demo skips object balls to keep the agent's learnable space small &mdash; just the cue ball, six pockets, one variable: angle.</p>
+          </div>
+
+          <div class="tip-card narrative-card">
+            <h3>The diamond system, applied</h3>
+            <p>Departure diamond + arrival diamond = aim line. Watch the trajectory readout on the rail when you sweep your mouse around: every bounce is labeled with the diamond coordinate it hit, the same number you would call out at a real table. Bank that math &mdash; you're studying it for real.</p>
+            <p class="tip-note">Same loop, different substrate: <strong>belief &rarr; guess &rarr; move &rarr; reality &rarr; surprise &rarr; sharper belief</strong>. Your nervous system runs it in 200ms. The agent runs it in your browser in 2 seconds.</p>
+          </div>
+        </div>
+
+        <p class="modal-foot">
+          That&rsquo;s all the physics this demo needs. The rest is just the agent filling in the row.
+        </p>
+      </div>
+    </div>
+
+    <!--
+      Wipe-memory confirmation modal. Replaces the jarring native
+      window.confirm() dialog with something that lives inside the
+      world of the demo. Mood: quiet, deliberate, slightly heavy -
+      this clears every Q-row the coach taught.
+    -->
+    <div id="wipe-modal" class="modal-backdrop wipe-backdrop hidden" aria-hidden="true">
+      <div class="modal wipe-modal" role="dialog" aria-modal="true" aria-labelledby="wipe-title">
+        <button class="modal-close" id="wipe-close" aria-label="Close">&times;</button>
+        <p class="eyebrow wipe-eyebrow">A deliberate forgetting</p>
+        <h2 id="wipe-title">Wipe the agent&rsquo;s entire memory?</h2>
+        <p class="wipe-lede">
+          Every Q-row the coach has taught will be erased. The agent
+          will return to a blank slate &mdash; no native reflex, no
+          learned angles, no priors. Every pocket becomes new terrain
+          again.
+        </p>
+        <ul class="wipe-list">
+          <li><span class="wipe-list-glyph">&#9003;</span> All trained variants forgotten</li>
+          <li><span class="wipe-list-glyph">&#9003;</span> Native reflex cleared</li>
+          <li><span class="wipe-list-glyph">&#9003;</span> On-disk snapshot deleted</li>
+        </ul>
+        <p class="wipe-aside">
+          Useful when you want to show someone the demo from absolute zero.
+        </p>
+        <div class="wipe-actions">
+          <button id="wipe-cancel" class="ghost-btn">Cancel</button>
+          <button id="wipe-confirm" class="ghost-btn danger-btn primary-danger-btn">Wipe memory</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="/static/app.js?v={{ asset_v }}" defer></script>
+  </body>
+</html>
