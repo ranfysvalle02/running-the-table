@@ -56,19 +56,35 @@ You do not reason your way out of a local minimum. You climb out of it. The clim
 
 ---
 
-## The CBT Protocol: Manual Backpropagation
+## The CBT Protocol: Manual Prediction-Error Updates
 
-Machine learning models update automatically via backpropagation. Human models, especially in adulthood, often require manual intervention.
+A quick note before the protocol, because this is the place the metaphor needs a sharper edge.
 
-In a child, the brain's learning rate is enormous—plasticity is the default mode, dendritic spines bloom and prune at astonishing speed, and beliefs form on a handful of examples. In an adult, that learning rate has been dialed down by orders of magnitude. The weights have crystallized. Myelin has insulated the most-traveled circuits. The metabolic cost of updating any given synapse has risen sharply, and so the brain, an organ obsessed with energy efficiency, refuses to spend that budget without a very good reason.
+Artificial neural networks update via **backpropagation**: a global error signal flows backward through the network, traversing the *same* weights used in the forward pass, and every parameter is updated in a single synchronized sweep. Biological brains can't do this. The synapse you ride forward is not the synapse you ride backward—there is no weight-transport machinery in cortex, no global teacher signal, no master clock. Anyone who tells you the brain "does backprop" is speaking metaphor, not biology.
 
-CBT is, mechanistically, a way to artificially crank the learning rate back up.
+What the brain actually does, on the best current evidence, is **predictive coding** with **local learning rules**. Each layer of cortex generates a prediction about the layer below it and sends that prediction *downward*. The lower layer sends only its **prediction error**—the part the higher layer failed to anticipate—*upward*. Synapses adjust based on what's happening locally at that synapse: Hebbian co-activation, modulated by neuromodulators that say "now, here, this update is allowed." The update is decentralized, local, and metabolically expensive.
+
+So the protocol below is not biological backprop. It is something better: a way for the conscious, narrating part of the system to *manually deliver an honest prediction-error signal* into a hierarchy that would otherwise keep generating its old top-down predictions on autopilot.
+
+Formally, CBT is forcing the system to execute, by hand, the same update rule any learning agent runs:
+
+$$\theta_{t+1} = \theta_t - \alpha \, \nabla J(\theta_t)$$
+
+Where:
+
+- $\theta_t$ are the stale priors (current synaptic weights, current beliefs).
+- $\nabla J(\theta_t)$ is the gradient of the loss—the discrepancy between what the model predicted and what reality returned.
+- $\alpha$ is the learning rate, which in a biological system is not a hyperparameter you set in a config file but a chemical state of the brain.
+
+In a child, $\alpha$ is enormous—plasticity is the default mode, dendritic spines bloom and prune at astonishing speed, and beliefs form on a handful of examples. In an adult, $\alpha$ has been dialed down by orders of magnitude. The weights have crystallized. Myelin has insulated the most-traveled circuits. The metabolic cost of updating any given synapse has risen sharply, and so the brain, an organ obsessed with energy efficiency, refuses to spend that budget without a very good reason.
+
+CBT is, mechanistically, a way to artificially crank $\alpha$ back up.
 
 Focused attention recruits the **locus coeruleus** to release norepinephrine, which marks the current moment as *important—save this*. Effortful learning recruits the **nucleus basalis** to release acetylcholine, which gates plasticity in the cortex and tells the brain, *now is when synapses are allowed to change.* A single session of disciplined cognitive work is, neurochemically, a deliberately staged plasticity event. You are not just "thinking differently." You are temporarily and surgically opening the window during which the underlying weights are *allowed* to be rewritten.
 
 This is why therapy that feels effortful tends to work, and therapy that feels comfortable tends not to. Comfort means the neuromodulators are quiet. Quiet neuromodulators mean a learning rate of zero. Zero learning rate means the forward pass runs, the loss is felt, and absolutely nothing about the underlying model changes.
 
-CBT breaks the update cycle into three explicit steps:
+With $\alpha$ raised, CBT breaks the update cycle into three explicit steps:
 
 ### 1. Catch the Prediction (The Forward Pass)
 In CBT, the first step is identifying the "Automatic Thought."
@@ -82,9 +98,9 @@ Does quiet *always* mean firing? What else could it mean? You are forcing the pr
 
 ### 3. Cognitive Restructuring (Weight Update)
 CBT asks the patient to generate a "Balanced Thought."
-*Translation:* You are applying the gradient update.
+*Translation:* You are applying the gradient update—locally, at the layer of the hierarchy that produced the wrong prediction in the first place.
 *"My manager is quiet, but they also praised my work yesterday. They might just be tired."*
-You are writing a new, more accurate prior back into the system.
+You are writing a new, more accurate prior back into the system. Because the brain's update is local rather than global, this rewrite only sticks at the level you can actually feel the error at—which is exactly why insight alone never reaches the amygdala, and why the next section matters.
 
 ---
 
@@ -100,7 +116,7 @@ In a biological neural network, updating a weight requires **neuroplasticity**. 
 
 To change a belief, your brain must physically dismantle synaptic connections and build new dendritic spines. It must transcribe DNA, synthesize proteins, and transport them down the axon. This is a metabolically expensive process. The brain resists it. It prefers to run the cached, highly myelinated pathways—the deep grooves worn into the loss landscape—because they cost less energy.
 
-This is why insight is not enough. You can *know* your manager isn't going to fire you, but your nervous system still spikes your cortisol. The semantic model has updated, but the deep, subcortical weights have not. Cortex has been retrained. Amygdala has not gotten the memo.
+This is why insight is not enough. You can *know* your manager isn't going to fire you, but your nervous system still spikes your cortisol. The semantic model has updated, but the deep, subcortical weights have not. Cortex has been retrained. Amygdala has not gotten the memo. There is no global error signal that flows from your prefrontal "I know better now" all the way down into the limbic circuits that fire the alarm—each layer has to receive its *own* prediction error, locally, from inputs it can actually feel.
 
 To change the deep weights, you need **Behavioral Activation** and **Exposure**.
 
