@@ -1210,6 +1210,55 @@
   // cinematic-mode rendering
   // ----------------------------------------------------------------------
 
+  // Per-route cool palette for the "futures that failed" lights.
+  //
+  // The agent's training run is for ONE specific (pocket, bounce_count)
+  // route. Made-shot futures stay vivid orange-gold (the lock-in palette);
+  // misses used to be a generic light blue regardless of route. That made
+  // every training session look identical. Now the misses inherit a
+  // per-pocket cool hue, modulated by bounce count, so a glance at the
+  // table tells you which route is being learned. Close-misses also tilt
+  // partway toward gold, so the convergence reads in color, not just in
+  // the gold-make rate.
+  //
+  // Returns { body, core } template strings using the "ALPHA" placeholder
+  // so existing `.replace("ALPHA", ...)` call sites keep working unchanged.
+  const POCKET_HUE = {
+    TL: 232, // cobalt
+    TR: 198, // cerulean
+    BR: 178, // teal-cyan
+    BL: 258, // indigo-violet
+    LM: 280, // violet
+    RM: 215, // sky-steel
+  };
+  const ROUTE_NEUTRAL_HUE = 200;
+  const ROUTE_GOLD_HUE = 38;
+  function routeMissPalette(pocketId, targetBounces, minDistance) {
+    const baseHue =
+      (pocketId && POCKET_HUE[pocketId] !== undefined)
+        ? POCKET_HUE[pocketId]
+        : ROUTE_NEUTRAL_HUE;
+    const b = Math.max(0, Math.min(3, Number(targetBounces) || 0));
+    // Bounce modulation: deeper bank = deeper, more saturated hue.
+    const baseSat = 58 + b * 7;     // 58 -> 79
+    const baseLight = 74 - b * 4;   // 74 -> 62
+    // Proximity warmth: misses that came close to the target pocket
+    // tilt partway toward gold (38 deg) so a near-miss reads warmer
+    // than a wild stab. Capped so misses never reach the made-color.
+    const dist = Math.max(0, Math.min(30, Number(minDistance)));
+    const proximity = Number.isFinite(dist) ? 1 - dist / 30 : 0;
+    const dh = (((ROUTE_GOLD_HUE - baseHue + 540) % 360) - 180); // shortest path
+    const hue = (baseHue + dh * proximity * 0.55 + 360) % 360;
+    const sat = Math.min(95, baseSat + proximity * 18);
+    const light = Math.min(86, baseLight + proximity * 6);
+    const coreSat = Math.min(100, sat + 8);
+    const coreLight = Math.min(94, light + 14);
+    return {
+      body: `hsla(${hue.toFixed(1)}, ${sat.toFixed(1)}%, ${light.toFixed(1)}%, ALPHA)`,
+      core: `hsla(${hue.toFixed(1)}, ${coreSat.toFixed(1)}%, ${coreLight.toFixed(1)}%, ALPHA)`,
+    };
+  }
+
   function drawGrooves(geo) {
     // Render last N futures as glowing parallel timelines. Made shots
     // are vivid orange-gold (the futures where the agent wins). Misses
@@ -1279,17 +1328,28 @@
     // quiet accent that ghosts on top of the groove library.
     if (ep && ep.path && ep.path.length >= 2) {
       const pts = ep.path.map(([x, y]) => worldToScreen(x, y, geo));
+      // Route-tinted palette for the live miss trace so the active
+      // attempt reads in the same color family as the trailing grooves.
+      const tracePalette = ep.made
+        ? null
+        : routeMissPalette(
+            ep.target_pocket || cine.targetPocket,
+            ep.target_bounces !== undefined
+              ? ep.target_bounces
+              : cine.targetBounces,
+            ep.min_distance
+          );
       ctx.save();
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
       ctx.shadowBlur = 6;
       ctx.shadowColor = ep.made
         ? "rgba(255, 220, 140, 0.7)"
-        : "rgba(180, 220, 240, 0.55)";
+        : tracePalette.body.replace("ALPHA", "0.55");
       ctx.lineWidth = ep.made ? 2.2 : 1.5;
       ctx.strokeStyle = ep.made
         ? "rgba(255, 250, 220, 0.9)"
-        : "rgba(220, 240, 250, 0.7)";
+        : tracePalette.core.replace("ALPHA", "0.7");
       ctx.beginPath();
       ctx.moveTo(pts[0].x, pts[0].y);
       for (let i = 1; i < pts.length; i += 1) ctx.lineTo(pts[i].x, pts[i].y);
@@ -1946,12 +2006,22 @@
     const ep = cine.episodes[cine.idx];
     if (!ep) return;
 
-    // Made shots stay vivid orange-gold (Strange's "right future"); misses
-    // are dim cyan ghosts (futures that fail). Both linger so the player
-    // sees many parallel simulations playing out at once.
+    // Made shots stay vivid orange-gold (Strange's "right future"). Misses
+    // are tinted by the route being trained: each pocket has its own cool
+    // hue, deeper banks deepen the saturation, and close-misses tilt
+    // partway toward gold so convergence reads in the color of the misses
+    // themselves -- not just in the gold-make rate.
+    const routePocket = ep.target_pocket || cine.targetPocket;
+    const routeBounces =
+      ep.target_bounces !== undefined ? ep.target_bounces : cine.targetBounces;
+    const missPalette = routeMissPalette(
+      routePocket,
+      routeBounces,
+      ep.min_distance
+    );
     const grooveColor = ep.made
       ? "rgba(255, 188, 90, ALPHA)"
-      : "rgba(120, 200, 220, ALPHA)";
+      : missPalette.body;
     cine.grooves.push({
       path: ep.path,
       alpha: ep.made ? 0.78 : 0.42,
@@ -1983,7 +2053,7 @@
         made: ep.made,
         color: ep.made
           ? "rgba(255, 220, 140, ALPHA)"
-          : "rgba(180, 220, 240, ALPHA)",
+          : missPalette.core,
       });
     }
     // Cap so we don't grow unbounded under heavy episode rates
