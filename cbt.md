@@ -104,6 +104,18 @@ You are writing a new, more accurate prior back into the system. Because the bra
 
 ---
 
+## Where the Metaphor Leaks
+
+Two honest caveats before we go further, because the equation in the last section is cleaner than the biology it points at.
+
+**The loss function is not stationary.** In machine learning, $J(\theta)$ is a fixed mathematical object—you can compute it, plot it, take derivatives of it, hold it constant while you sweep the parameters. In a human, the loss function is itself one of the things you are trying to update. Allostatic setpoints, dopamine baselines, what your body has decided counts as a "bad outcome"—these are all functions of the same priors you are trying to change. Update a handful of weights and the gradient you were chasing has shifted under your feet. This is why recovery is recursive rather than linear, and why an intervention that did nothing in year one can suddenly land in year three: not because you finally "tried hard enough," but because the loss function has moved into a regime where the intervention now has a gradient to climb.
+
+**The learning rate is not a scalar.** Calling $\alpha$ "the learning rate" is a useful pedagogical shortcut, but biologically there is no single $\alpha$. There is a high-dimensional, region-specific *tensor* of plasticity. **Dopamine** gates reward-relevant updates in the striatum on a sub-second timescale. **Serotonin** shapes plasticity in long-range cortical circuits and biases the system toward (or away from) exploration. **Oxytocin** opens attachment-related learning during safe co-regulation—you literally learn faster about another human when you feel safe with them. **Glial cells** (astrocytes, microglia) metabolically constrain how fast any local synapse can physically be remodeled, on top of all of that. The hippocampus runs its own consolidation clock on a different timescale than cortex; the amygdala runs another. The brain is operating many concurrent learning rates at many scales, simultaneously, in different anatomical neighborhoods, gated by different chemicals.
+
+CBT mostly raises the cortical, attention-gated rates—norepinephrine and acetylcholine, in the regions a prefrontal narrator can reach. Other modalities raise others. Which is exactly where the next section is headed.
+
+---
+
 ## Neuroplasticity: The Physics of the Update
 
 Why is CBT so exhausting? Why does it feel like physical labor to change your mind?
@@ -122,7 +134,15 @@ To change the deep weights, you need **Behavioral Activation** and **Exposure**.
 
 You cannot update a model without running it. You have to put yourself in the situation, trigger the prediction, survive the anxiety, and let the brain experience the *absence* of the predicted catastrophe. You have to generate a massive Reward Prediction Error—the same chemical signal a Q-learning agent gets when reality beats expectation—right inside the circuit that has been getting it wrong.
 
-You have to do it over, and over, and over again. Each repetition is a single gradient step. Each step is small. The reason the protocol works is not that any single session is transformative; it is that the gradient, applied honestly and repeatedly, eventually moves the model out of one valley and into another.
+And here is the place to be honest about CBT's limits, because for some kinds of damage, even Exposure is not enough.
+
+Classical CBT works beautifully on circuits where the cortex can still *catch the forward pass*—where the prefrontal narrator gets to label the automatic thought before the alarm fires. For complex trauma (C-PTSD), severe dissociation, and developmental injuries that wrote weights into circuits older than language, the cortex never gets that chance. The brainstem and limbic system fire the threat response so fast, and so far below the threshold of awareness, that there is no "automatic thought" to catch; the body is already braced, dissociated, or flooded before any sentence has time to form. The forward pass is hijacked before it ever reaches the layers CBT knows how to talk to.
+
+When the top-down pathway is overridden before it can fire, you need bottom-up updates. **EMDR, Somatic Experiencing, sensorimotor psychotherapy, breathwork, and trauma-informed bodywork** are not in opposition to CBT—they target a different layer of the same predictive hierarchy. They deliver prediction-error signals directly into the body, into the brainstem, into the interoceptive pathways that no worksheet can reach. They climb the local minimum from below.
+
+A complete protocol uses both. Cortex gets the language. Body gets the felt sense of safety. The hierarchy is updated layer by layer, from wherever the original injury was actually written into the weights.
+
+Either way, the update is repetitive. You have to do it over, and over, and over again. Each repetition is a single gradient step. Each step is small. The reason the protocol works is not that any single session is transformative; it is that the gradient, applied honestly and repeatedly, eventually moves the model out of one valley and into another.
 
 You have to force the electricity down the new pathway until the physical structure of the brain catches up with the math.
 
