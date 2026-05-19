@@ -36,6 +36,16 @@ In CBT, this is called a **Cognitive Distortion**.
 
 The tragedy of a cognitive distortion is that the brain's prediction engine is working perfectly. It is executing its math flawlessly. It is just running on stale priors.
 
+### Active Inference: The World as Training Data
+
+And here is the part that explains half the suffering in human life.
+
+The Free Energy Principle says a prediction engine has *two* ways to reduce its error. It can **update itself** to match the world—what we have been calling learning, perception, CBT. Or it can **act on the world** to make the world match its prediction. This second move is called **active inference**, and it is mathematically just as valid as the first. Both close the gap between expectation and reality. They cost very different things.
+
+This is why people who learned "everyone leaves" subconsciously sabotage relationships until everyone does, in fact, leave. Why people who learned "I am unsafe" provoke conflict until the room turns hostile and confirms the prior. Why people who learned "I am not allowed to want things" structure their lives in ways that quietly guarantee they never get what they want. None of this is a failure of intelligence. It is exactly what a low-loss prediction engine is built to do—close the gap between expectation and reality by whatever route is metabolically cheapest. Updating ancient subcortical weights is expensive. Re-creating the original training distribution is nearly free. The body is willing to burn entire decades to keep being right about an inheritance it never asked for.
+
+This is also why the cognitive-distortion list above does not fully describe what is happening. The model is not just misreading the world; it is *recruiting* the world to confirm the misreading. CBT, somatic work, and exposure are all, at their core, attempts to interrupt the active-inference loop long enough that the brain is forced to update itself instead of force-fitting reality.
+
 ---
 
 ## Trapped in a Local Minimum
@@ -73,7 +83,8 @@ $$\theta_{t+1} = \theta_t - \alpha \, \nabla J(\theta_t)$$
 Where:
 
 - $\theta_t$ are the stale priors (current synaptic weights, current beliefs).
-- $\nabla J(\theta_t)$ is the gradient of the loss—the discrepancy between what the model predicted and what reality returned.
+- $J(\theta_t)$ is the loss itself: the felt discrepancy between what the model predicted and what reality returned.
+- $\nabla J(\theta_t)$ is the **gradient** of that loss—the direction of steepest *ascent* of the error in weight space. It is not the error; it is the vector that tells the model exactly which way every weight would have to move in order to make the discrepancy *worse*. The minus sign in front of $\alpha$ is what turns the rule into descent: we step in the opposite direction of fastest-getting-worse, which is, by construction, the direction of fastest-getting-better.
 - $\alpha$ is the learning rate, which in a biological system is not a hyperparameter you set in a config file but a chemical state of the brain.
 
 In a child, $\alpha$ is enormous—plasticity is the default mode, dendritic spines bloom and prune at astonishing speed, and beliefs form on a handful of examples. In an adult, $\alpha$ has been dialed down by orders of magnitude. The weights have crystallized. Myelin has insulated the most-traveled circuits. The metabolic cost of updating any given synapse has risen sharply, and so the brain, an organ obsessed with energy efficiency, refuses to spend that budget without a very good reason.
@@ -139,6 +150,8 @@ And here is the place to be honest about CBT's limits, because for some kinds of
 Classical CBT works beautifully on circuits where the cortex can still *catch the forward pass*—where the prefrontal narrator gets to label the automatic thought before the alarm fires. For complex trauma (C-PTSD), severe dissociation, and developmental injuries that wrote weights into circuits older than language, the cortex never gets that chance. The brainstem and limbic system fire the threat response so fast, and so far below the threshold of awareness, that there is no "automatic thought" to catch; the body is already braced, dissociated, or flooded before any sentence has time to form. The forward pass is hijacked before it ever reaches the layers CBT knows how to talk to.
 
 When the top-down pathway is overridden before it can fire, you need bottom-up updates. **EMDR, Somatic Experiencing, sensorimotor psychotherapy, breathwork, and trauma-informed bodywork** are not in opposition to CBT—they target a different layer of the same predictive hierarchy. They deliver prediction-error signals directly into the body, into the brainstem, into the interoceptive pathways that no worksheet can reach. They climb the local minimum from below.
+
+The reason this works can be stated cleanly in ML terms. Cortex does mostly *supervised* learning—labeled examples, narrated outcomes, "good" and "bad" assigned by the prefrontal narrator. The body does **unsupervised learning**. It extracts statistical structure from raw sensory and interoceptive data without ever needing a verbal label: it just learns *what range of heart-rate, muscle-tone, gut-tension, and breath-depth is normal here, and how surprised should I be when those signals leave that range.* Trauma teaches this system a wide, hair-trigger baseline—high variance, sympathetic-dominant, primed for emergency—because that baseline minimized loss in the environment it was trained in. EMDR's bilateral stimulation, somatic experiencing's titrated sensation tracking, breathwork's deliberate vagal engagement, the slow trust-building of safe touch in sensorimotor work—none of these talk to the cortical narrator. They feed the body new raw sensory data under safety-cued conditions, until the unsupervised system *renormalizes its variance estimate*. The interoceptive baseline drops. The implicit prior on "expected dangerousness of being in a body" falls. The body has been computing a loss function without words the entire time; these modalities are the only inputs that can change what that wordless loss function thinks counts as "fine."
 
 A complete protocol uses both. Cortex gets the language. Body gets the felt sense of safety. The hierarchy is updated layer by layer, from wherever the original injury was actually written into the weights.
 
