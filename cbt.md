@@ -148,13 +148,39 @@ You have to force the electricity down the new pathway until the physical struct
 
 ---
 
+## Overfitting to Safety: Why the Update Must Generalize
+
+There is one more failure mode worth naming, because it is the most heartbreaking and the most common in early recovery: you do the work, the gradient descends, the new weights land beautifully—and then they only work *in one specific room.*
+
+In machine learning this is called **overfitting**. A model overfits when it memorizes its training set so precisely that it loses the ability to generalize. Show it the same data and it scores 100%; show it a single example from a slightly different distribution and it falls apart. The model has learned the training examples instead of the underlying rule.
+
+Therapy has its own version. In the early months of safe-relationship work, the nervous system often does not learn "I am safe in the world." It learns "I am safe *with this therapist, on this couch, on Tuesday at 3pm.*" The patient can articulate boundaries fluently in session and lose them entirely at family dinner three hours later. They feel grounded in the office and dissociate at the office party. The weights have moved—but they have moved in a way that is conditioned on the exact context that produced the prediction error in the first place. The model has overfit to the therapeutic alliance.
+
+The cousin of overfitting is **catastrophic forgetting**. Under acute stress, cortisol drives the prefrontal cortex partially offline, and the older, more deeply myelinated subcortical circuits regain control. Whatever fragile new weights were laid down in calm conditions can be temporarily overwritten by the body's reversion to its original survival policy. People describe this as "I lost everything I knew in that fight" or "I became my mother for an hour." Mechanically, the brain has just temporarily switched back to the policy it has had for thirty years, because that policy was easier to retrieve under load. The new weights are not gone; they are simply not the dominant function in that moment.
+
+Real recovery, in other words, is a **regularization** problem.
+
+In ML, regularization is whatever you do to prevent a model from memorizing the training set: L1 / L2 penalties to keep weights small, dropout to force redundancy, data augmentation to vary the inputs, train/test splits to verify the model still works on data it has not seen. Biology has its own versions of every one of these:
+
+- **Varied exposure (data augmentation).** Practicing the new response in many different environments, with many different people, at many different intensity levels—so the nervous system cannot encode the safety learning as a memory of one specific room.
+- **Between-session homework (held-out test sets).** Every behavioral activation assignment is, mechanically, an evaluation pass on data the patient was not trained on inside the therapist's office. Failures are not setbacks; they are diagnostics—they tell you which inputs the current model does and doesn't yet handle.
+- **Sleep and consolidation (the brain's built-in regularizer).** Slow-wave sleep replays new learning, integrates it into existing memory networks, and stabilizes the weights into something durable. Therapy without adequate sleep is training without checkpointing.
+- **Internalization of the alliance (model distillation).** Over time, the therapist becomes an *internalized object*—an inner voice the patient can summon outside the office. This is the biological equivalent of distilling a large model down into a small one that runs on local hardware. The patient is no longer renting safety from a single relationship; they have copied a working representation of it into themselves.
+- **Multiple safe relationships (ensembling).** Group therapy, chosen family, and trustworthy community create a regularization pressure that no single relationship can: the safety cannot be conditioned on one face, because there are several faces.
+
+The first time the new weights survive a real test—a hard week without the therapist present, a confrontation handled cleanly, a triggering environment navigated without dissociating—that is not luck. That is the moment the model has *generalized.* The training set has finally produced a function that works in the wild.
+
+Until that moment, the work is real but the model is brittle. And brittleness in a freshly trained model is not a moral failure either; it is what newly placed weights look like before they have been regularized into something that holds under noise.
+
+---
+
 ## The Optimizer is You
 
 Therapy is not venting. It is not complaining. It is not magic. It is also not something you do alone—the therapeutic relationship is itself part of the optimizer, the external momentum that helps the model climb out of valleys it cannot escape by reasoning alone.
 
-What it *is*, underneath everything, is the grueling, mechanical work of taking a prediction engine that was trained on a hostile dataset, placing it in a safe environment with a competent collaborator, and manually forcing the gradients to descend—patiently, repeatedly, against the protests of an organ that would rather not spend the energy—until the model finally aligns with the reality you actually live in.
+What it *is*, underneath everything, is the grueling, mechanical work of taking a prediction engine that was trained on a hostile dataset, placing it in a safe environment with a competent collaborator, manually forcing the gradients to descend—patiently, repeatedly, against the protests of an organ that would rather not spend the energy—and then regularizing the result until the new weights generalize from the safety of the office out into the noisy, ambiguous, untrained world you actually have to live in.
 
-The architecture is universal. The distortions are just math. The neuroplasticity is waiting. The local minimum you are stuck in is not a verdict on who you are; it is a record of where the gradient ran out the first time around.
+The architecture is universal. The distortions are just math. The neuroplasticity is waiting. The local minimum you are stuck in is not a verdict on who you are; it is a record of where the gradient ran out the first time around. And the brittleness of your first new weights is not proof the work isn't real; it is the texture of any model that has not yet been tested in the wild.
 
 You are the optimizer. The learning rate is ready to be opened.
 
