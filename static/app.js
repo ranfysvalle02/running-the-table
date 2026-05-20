@@ -141,6 +141,16 @@
     targetPocket: null,
   };
 
+  // "Place the ball" setup beat. While `appMode === "setup"` the cue
+  // ball follows the mouse so the user can pick a starting coordinate.
+  // A single click drops & locks the ball, then the app transitions
+  // back into the normal `predict` loop.
+  const setup = {
+    pos: null,        // { x, y } in WORLD coords (table units)
+    pulsePhase: 0,    // local clock for the pulsing halo
+    committing: false,
+  };
+
   // sanctum (Dr Strange beat) state
   const sanctum = {
     active: false,
@@ -274,6 +284,22 @@
     const sx = geo.feltX + (x / cfg.table.width) * geo.feltW;
     const sy = geo.feltY + geo.feltH - (y / cfg.table.height) * geo.feltH;
     return { x: sx, y: sy };
+  }
+
+  // Inverse of worldToScreen. Maps a canvas-space (sx, sy) back into
+  // the pool table's (worldX, worldY) coordinate system, clamped a
+  // pocket-radius away from each rail so the user can't park the cue
+  // ball inside a cushion or jaw during the setup beat.
+  function screenToWorld(sx, sy, geo) {
+    const W = cfg && cfg.table ? cfg.table.width : 100;
+    const H = cfg && cfg.table ? cfg.table.height : 200;
+    const r = cfg && cfg.pocket_radius ? cfg.pocket_radius : 5;
+    let wx = ((sx - geo.feltX) / geo.feltW) * W;
+    let wy = ((geo.feltY + geo.feltH - sy) / geo.feltH) * H;
+    const margin = r + 0.5;
+    wx = Math.max(margin, Math.min(W - margin, wx));
+    wy = Math.max(margin, Math.min(H - margin, wy));
+    return { x: wx, y: wy };
   }
 
   function pocketScreenPositions(geo) {
@@ -427,6 +453,8 @@
       // live aim ghost so the result stays clean and readable.
       if (!anim.active && !anim.frozen && aim.previewSim) drawAimPreview(geo);
       drawCueStickAndBall(geo);
+    } else if (appMode === "setup") {
+      drawSetupCue(geo);
     } else {
       drawCinematicLayer(geo);
     }
@@ -1069,6 +1097,74 @@
     ctx.strokeStyle = "rgba(0,0,0,0.45)";
     ctx.stroke();
     ctx.restore();
+  }
+
+  // Setup-mode rendering. The cue ball follows the mouse (clamped to
+  // the felt by screenToWorld) and a slow cyan halo pulses around it
+  // so the eye reads "click to lock this position." A faint dotted
+  // crosshair through the ball anchors the diamond-system readout for
+  // players who already think in coordinates.
+  function drawSetupCue(geo) {
+    if (!cfg || !setup.pos) return;
+    const screen = worldToScreen(setup.pos.x, setup.pos.y, geo);
+    const baseR = 11;
+    const phase = setup.pulsePhase || 0;
+    const haloR = baseR + 8 + Math.sin(phase) * 4;
+    const haloAlpha = 0.32 + 0.18 * (0.5 + 0.5 * Math.sin(phase));
+
+    // pulsing halo
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(screen.x, screen.y, haloR, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(91, 225, 192, ${haloAlpha.toFixed(3)})`;
+    ctx.lineWidth = 1.4;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(screen.x, screen.y, haloR + 6, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(91, 225, 192, ${(haloAlpha * 0.45).toFixed(3)})`;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.restore();
+
+    // crosshair into the rails so the user sees the diamond projection
+    ctx.save();
+    ctx.setLineDash([2, 5]);
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "rgba(91, 225, 192, 0.32)";
+    ctx.beginPath();
+    ctx.moveTo(geo.feltX, screen.y);
+    ctx.lineTo(geo.feltX + geo.feltW, screen.y);
+    ctx.moveTo(screen.x, geo.feltY);
+    ctx.lineTo(screen.x, geo.feltY + geo.feltH);
+    ctx.stroke();
+    ctx.restore();
+
+    // the ball itself
+    drawBall(screen.x, screen.y, baseR, 1);
+
+    // coordinate chip beneath the ball
+    const dx = setup.pos.x / 25;
+    const dy = setup.pos.y / 25;
+    const chip = `LOCK HERE \u00B7 (${setup.pos.x.toFixed(0)}, ${setup.pos.y.toFixed(0)})`;
+    ctx.save();
+    ctx.font = "700 11px 'JetBrains Mono', monospace";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    const padX = 8, padY = 4;
+    const tw = ctx.measureText(chip).width;
+    const cx0 = screen.x - tw / 2 - padX;
+    const cy0 = screen.y + baseR + 14;
+    ctx.fillStyle = "rgba(7, 10, 14, 0.9)";
+    ctx.strokeStyle = "rgba(91, 225, 192, 0.7)";
+    ctx.lineWidth = 1;
+    roundRect(cx0, cy0 - padY, tw + padX * 2, 18 + padY, 6);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = "rgba(91, 225, 192, 1)";
+    ctx.fillText(chip, screen.x, cy0 + 8);
+    ctx.restore();
+    // suppress unused-var warning for dx/dy without affecting render
+    void dx; void dy;
   }
 
   // Live trajectory preview while the player is aiming. Dashed ghost
@@ -1837,6 +1933,8 @@
   function tick() {
     if (appMode === "predict") {
       tickPredict();
+    } else if (appMode === "setup") {
+      tickSetup();
     } else {
       tickCinematic();
     }
@@ -1974,6 +2072,13 @@
     if (isOODMiss) {
       triggerSanctum(result.pocket_id);
     }
+  }
+
+  // Setup-mode tick: no shot animation to run, but we keep a slow
+  // sinusoidal pulse phase running so the halo around the floating
+  // cue ball reads as "waiting on your click."
+  function tickSetup() {
+    setup.pulsePhase = (performance.now() / 700) % (Math.PI * 2);
   }
 
   function tickCinematic() {
@@ -3100,14 +3205,19 @@
   }
 
   // Keep the right-panel "Aim Readout" in sync with the current aim.
-  // CUE diamond coord is static (the cue is locked). TARGET / ANGLE /
-  // BANKS update live as the mouse moves into a pocket lane. During
-  // a frozen post-shot or the cinematic, we show locked values.
+  // CUE diamond coord follows setup.pos while the ball is still being
+  // placed, then the locked coord afterward. TARGET / ANGLE / BANKS
+  // update live as the mouse moves into a pocket lane. During a frozen
+  // post-shot or the cinematic, we show locked values.
   function refreshAimReadout() {
     if (!els.aimCue) return;
 
-    // CUE coord - locked, but shown live so users can see the convention.
-    if (cfg && cfg.fixed_cue) {
+    // CUE coord - tracks the floating ball during setup so the diamond
+    // readout matches what the user is dragging, then locks once placed.
+    if (appMode === "setup" && setup.pos) {
+      const cueDiamond = setup.pos.y / 25;
+      els.aimCue.textContent = `D${cueDiamond.toFixed(1)}`;
+    } else if (cfg && cfg.fixed_cue) {
       const cueDiamond = cfg.fixed_cue.y / 25;
       els.aimCue.textContent = `D${cueDiamond.toFixed(1)}`;
     }
@@ -3228,6 +3338,18 @@
     const mx = e.clientX - rect.left;
     const my = e.clientY - rect.top;
 
+    // Setup beat: the cue ball IS the cursor. Drag anywhere on the felt
+    // to choose the starting coordinate, then click to lock.
+    if (appMode === "setup") {
+      const geo = tableGeometry();
+      setup.pos = screenToWorld(mx, my, geo);
+      // Live CUE-diamond readout follows the floating ball so the user
+      // can see exactly which diamond row they're committing to.
+      refreshAimReadout();
+      canvas.style.cursor = "grab";
+      return;
+    }
+
     // Always coaching mode. While the agent is idle, the cue tracks your
     // mouse and the trajectory previews live. While frozen on a result,
     // aim tracking pauses so the painted result stays put.
@@ -3258,10 +3380,22 @@
   }
 
   function handleClick(e) {
-    if (busy || appMode !== "predict") return;
     const rect = canvas.getBoundingClientRect();
     const mx = e.clientX - rect.left;
     const my = e.clientY - rect.top;
+
+    // Setup beat: click commits the current ball position to the
+    // backend, then transitions into the normal predict loop.
+    if (appMode === "setup") {
+      const geo = tableGeometry();
+      const pos = screenToWorld(mx, my, geo);
+      setup.pos = pos;
+      canvas.style.cursor = "default";
+      commitCueLock(pos);
+      return;
+    }
+
+    if (busy || appMode !== "predict") return;
 
     if (anim.frozen) {
       // Frozen-state gesture grammar:
@@ -3332,6 +3466,17 @@
 
   async function askAgentToCall(pocketId) {
     if (!cfg) return;
+    // Block call-shots until the cue is locked. Memory-grid clicks
+    // bypass handleClick, so without this guard the agent would fire
+    // a /predict against the un-placed seed coordinate.
+    if (appMode === "setup") {
+      if (els.hint) {
+        els.hint.textContent =
+          "Lock the cue ball first \u2014 click anywhere on the felt to place it.";
+      }
+      return;
+    }
+    if (appMode !== "predict") return;
     busy = true;
     els.hint.textContent = `Agent calling ${pocketLabel(pocketId)}...`;
     try {
@@ -4331,6 +4476,18 @@
       });
       return;
     }
+    // Wiping while the cue ball hasn't been placed makes no sense - the
+    // Q-table is already empty, and the post-wipe auto-relock would
+    // silently snap the cue to the seed coordinate without the user
+    // choosing. Refuse and steer them back to the setup beat.
+    if (appMode === "setup") {
+      showStageToast("Place the cue ball first", {
+        variant: "danger",
+        glyph: "\u2327",
+        dwellMs: 1800,
+      });
+      return;
+    }
     const ok = await openWipeModal();
     if (!ok) return;
     if (els.wipeMemory) {
@@ -4357,6 +4514,25 @@
       // Beat 3: thaw any frozen shot, return to aim, restamp the dashboard.
       gracefulRack({ pulse: false, toast: false });
       refreshDashboard();
+      // The backend memory/reset endpoint deletes the entire session
+      // (including the cue lock), so re-lock the cue at its current
+      // visible position to keep the UX seamless. If the user wants a
+      // new starting coordinate they can move it AFTER teaching the
+      // first variant in the wiped session.
+      try {
+        if (cfg && cfg.fixed_cue) {
+          await fetch("/cue/lock", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              session_id: sessionId,
+              x: cfg.fixed_cue.x,
+              y: cfg.fixed_cue.y,
+            }),
+          });
+          if (cfg) cfg.cue_locked = true;
+        }
+      } catch (_) {}
       aim.angleDeg = defaultAimAngle();
       refreshAim();
       if (els.narrator) {
@@ -4639,10 +4815,97 @@
     buildMemoryGrid();
     refreshDashboard();
     renderRPEHistory();
-    setWisdomCallout("idle");
-    aim.angleDeg = defaultAimAngle();
-    refreshAim();
+    if (cfg && cfg.cue_locked === false) {
+      enterSetupMode();
+    } else {
+      setWisdomCallout("idle");
+      aim.angleDeg = defaultAimAngle();
+      refreshAim();
+    }
     requestAnimationFrame(tick);
+  }
+
+  // Drop the user into the "place the ball" beat. The cue ball follows
+  // the mouse anywhere on the felt; a single click commits the spot to
+  // the backend (POST /cue/lock) and transitions into predict mode.
+  function enterSetupMode() {
+    appMode = "setup";
+    // Seed the floating ball at the session's current default coord
+    // so the table never renders empty.
+    setup.pos = cfg && cfg.fixed_cue
+      ? { x: cfg.fixed_cue.x, y: cfg.fixed_cue.y }
+      : { x: 50, y: 30 };
+    setup.committing = false;
+    setup.pulsePhase = 0;
+    aim.previewSim = null;
+    aim.targetPocket = null;
+    hoverPocket = null;
+    if (canvas) {
+      canvas.style.cursor = "grab";
+    }
+    updateTeachButton();
+    refreshAimReadout();
+    if (els.phaseTitle) {
+      els.phaseTitle.textContent = "Place the cue ball";
+    }
+    if (els.narrator) {
+      els.narrator.textContent =
+        "Drag the cue ball anywhere on the felt. Click to lock its starting position for the rest of the session.";
+    }
+    if (els.hint) {
+      els.hint.textContent =
+        "Move the ball to choose your starting coordinate, then click to lock.";
+    }
+  }
+
+  // POST the chosen position to the backend, snap the local cfg, and
+  // hand control over to predict mode. Idempotent: a double-click is
+  // ignored while the request is in flight.
+  async function commitCueLock(pos) {
+    if (setup.committing) return;
+    setup.committing = true;
+    try {
+      const res = await fetch("/cue/lock", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          session_id: sessionId,
+          x: pos.x,
+          y: pos.y,
+        }),
+      });
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+      const data = await res.json();
+      if (cfg) {
+        cfg.fixed_cue = { x: data.cue.x, y: data.cue.y };
+        cfg.cue_locked = true;
+      }
+      appMode = "predict";
+      setup.committing = false;
+      setWisdomCallout("idle");
+      aim.angleDeg = defaultAimAngle();
+      refreshAim();
+      refreshAimReadout();
+      if (els.phaseTitle) {
+        els.phaseTitle.textContent = "Awaiting Shot";
+      }
+      if (els.narrator) {
+        els.narrator.textContent =
+          `Cue ball locked at (${data.cue.x.toFixed(0)}, ${data.cue.y.toFixed(0)}). Move the cue to aim. The trajectory picks the pocket. Click Teach this shot to imprint the Q-row, or click any pocket to test what the agent already knows.`;
+      }
+      if (els.hint) {
+        els.hint.textContent =
+          "Aim into a pocket. The trajectory picks it for you.";
+      }
+    } catch (err) {
+      setup.committing = false;
+      if (els.hint) {
+        els.hint.textContent = `Could not lock the cue: ${err}`;
+      }
+      console.error("cue lock failed:", err);
+    }
   }
 
   function defaultAimAngle() {

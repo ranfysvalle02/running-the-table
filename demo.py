@@ -47,10 +47,16 @@ from pydantic import BaseModel
 TABLE_WIDTH = 100.0
 TABLE_HEIGHT = 200.0
 
-# Cue is locked at (50, 30) on purpose: from (50, 50) the optimal 135 deg
-# bank into TR passes exactly through LM, which would make the agent's
-# OOD answer for LM accidentally succeed.  (50, 30) breaks that
-# coincidence so OOD pockets miss cleanly.
+# Default cue position. From (50, 50) the optimal 135 deg bank into TR
+# passes exactly through LM, which would make the agent's OOD answer
+# for LM accidentally succeed.  (50, 30) breaks that coincidence so OOD
+# pockets miss cleanly.
+#
+# This is now only the SEED value: each session locks its own cue
+# coordinate during the setup beat, and the trainer/physics/predict
+# pipeline reads from the session, not this constant. We keep
+# `FIXED_CUE` exposed as the default so the frontend "rack" reset and
+# legacy tests still have a sane starting point.
 FIXED_CUE: Tuple[float, float] = (50.0, 30.0)
 POCKET_RADIUS = 5.0
 
@@ -576,6 +582,14 @@ class SessionState:
     training_status: dict
     training_buffer: List[dict]
     last_accessed: float
+    # Per-session cue position. Defaults to the legacy FIXED_CUE seed
+    # until the user explicitly locks one via POST /cue/lock. While
+    # `cue_locked` is False the frontend is in the "place the ball"
+    # setup beat; once locked, the rest of the app behaves exactly as
+    # before but reads (cue_x, cue_y) from here instead of the global.
+    cue_x: float = FIXED_CUE[0]
+    cue_y: float = FIXED_CUE[1]
+    cue_locked: bool = False
 
 SESSIONS: Dict[str, SessionState] = {}
 
@@ -599,11 +613,21 @@ def get_session(session_id: str) -> SessionState:
                 "strict_match_learned": None,
             },
             training_buffer=[],
-            last_accessed=time.time()
+            last_accessed=time.time(),
+            cue_x=FIXED_CUE[0],
+            cue_y=FIXED_CUE[1],
+            cue_locked=False,
         )
     else:
         SESSIONS[session_id].last_accessed = time.time()
     return SESSIONS[session_id]
+
+
+def _session_cue(session_id: str) -> Tuple[float, float]:
+    """Cue position for this session. Falls back to the legacy seed
+    until the user has locked one via POST /cue/lock."""
+    session = get_session(session_id)
+    return (session.cue_x, session.cue_y)
 
 
 def _agent_angle_for(
@@ -647,12 +671,13 @@ def _agent_angle_for(
     return native, "agent_native_reflex", 0
 
 
-def _oracle_angle(pocket_xy: Tuple[float, float]) -> float:
+def _oracle_angle(session_id: str, pocket_xy: Tuple[float, float]) -> float:
+    cue_x, cue_y = _session_cue(session_id)
     best_angle = 0.0
     best_dist = float("inf")
     best_reward = -float("inf")
     for angle in range(360):
-        trial = evaluate_angle(FIXED_CUE[0], FIXED_CUE[1], float(angle), pocket_xy)
+        trial = evaluate_angle(cue_x, cue_y, float(angle), pocket_xy)
         dist = float(trial["min_distance"])
         reward = float(trial["reward"])
         if dist < best_dist or (math.isclose(dist, best_dist) and reward > best_reward):
@@ -670,8 +695,8 @@ def _decide_angle(
         angle, source, _bounces = _agent_angle_for(session_id, pocket_id, target_bounces)
         if angle is not None:
             return float(angle), source
-        return _oracle_angle(pocket_xy), "oracle_fallback"
-    return _oracle_angle(pocket_xy), "oracle"
+        return _oracle_angle(session_id, pocket_xy), "oracle_fallback"
+    return _oracle_angle(session_id, pocket_xy), "oracle"
 
 
 # ---------------------------------------------------------------------------
@@ -880,10 +905,11 @@ def _training_thread(
     exact_inference_angle: Optional[float] = None
     if anchor_action is not None and anchor_angle_deg is not None:
         target_xy_for_snap = POCKETS[target_pocket]
+        cue_x_snap, cue_y_snap = _session_cue(session_id)
 
         def _angle_pockets_variant(ang: float) -> bool:
             sim = evaluate_angle(
-                FIXED_CUE[0], FIXED_CUE[1], float(ang), target_xy_for_snap
+                cue_x_snap, cue_y_snap, float(ang), target_xy_for_snap
             )
             if not bool(sim.get("made")):
                 return False
@@ -945,6 +971,7 @@ def _training_thread(
         )
 
         target_xy = POCKETS[target_pocket]
+        cue_x_train, cue_y_train = _session_cue(session_id)
         if reset_q:
             trainer.q[vid] = np.zeros(N_ANGLES, dtype=np.float64)
             trainer.visits[vid] = np.zeros(N_ANGLES, dtype=np.int64)
@@ -1069,7 +1096,7 @@ def _training_thread(
                         action = int(np.argmax(trainer.q[vid]))
             angle_deg = angle_for_action(action)
             sim = evaluate_angle(
-                FIXED_CUE[0], FIXED_CUE[1], angle_deg, target_xy
+                cue_x_train, cue_y_train, angle_deg, target_xy
             )
             base_reward = float(sim["reward"])
 
@@ -1388,7 +1415,13 @@ def config(session_id: str) -> dict:
     session = get_session(session_id)
     return {
         "table": {"width": TABLE_WIDTH, "height": TABLE_HEIGHT},
-        "fixed_cue": {"x": FIXED_CUE[0], "y": FIXED_CUE[1]},
+        # `fixed_cue` now reports the session's current cue (locked or
+        # default) so existing frontend code keeps reading from the same
+        # field. The new `cue_locked` flag tells the UI whether the user
+        # still needs to place the ball.
+        "fixed_cue": {"x": session.cue_x, "y": session.cue_y},
+        "cue_locked": bool(session.cue_locked),
+        "cue_default": {"x": FIXED_CUE[0], "y": FIXED_CUE[1]},
         "pocket_radius": POCKET_RADIUS,
         "middle_pocket_mouth_margin": MIDDLE_POCKET_MOUTH_MARGIN,
         "middle_pocket_ids": sorted(_MIDDLE_POCKETS),
@@ -1403,6 +1436,40 @@ def config(session_id: str) -> dict:
         "loop_steps": LOOP_STEPS,
         "n_angles": N_ANGLES,
         "angle_per_action_deg": 360.0 / N_ANGLES,
+    }
+
+
+class CueLockRequest(BaseModel):
+    session_id: str
+    x: float
+    y: float
+
+
+@app.post("/cue/lock")
+def cue_lock(req: CueLockRequest) -> dict:
+    """Lock the session's cue ball at (x, y) for the rest of the session.
+
+    Coordinates are clamped to the table interior, away from the rail
+    so the ball can't be placed inside a cushion. After this call the
+    frontend transitions out of "setup" mode and the Q-table / training
+    / predict pipelines all read from the locked position.
+    """
+    session = get_session(req.session_id)
+    if session.training_status.get("status") == "training":
+        raise HTTPException(
+            status_code=409,
+            detail="Training is in progress. Wait for it to finish before relocking the cue.",
+        )
+    margin = POCKET_RADIUS + 0.5
+    x = max(margin, min(TABLE_WIDTH - margin, float(req.x)))
+    y = max(margin, min(TABLE_HEIGHT - margin, float(req.y)))
+    session.cue_x = x
+    session.cue_y = y
+    session.cue_locked = True
+    return {
+        "status": "ok",
+        "cue": {"x": x, "y": y},
+        "cue_locked": True,
     }
 
 
@@ -1428,7 +1495,8 @@ def preview(req: PredictRequest) -> dict:
             status_code=400, detail="target_bounces must be 0, 1, 2, or 3"
         )
     angle_deg, decision = _decide_angle(session_id, pocket_id, mode, target_bounces)
-    sim = evaluate_angle(FIXED_CUE[0], FIXED_CUE[1], angle_deg, POCKETS[pocket_id])
+    cue_x, cue_y = _session_cue(session_id)
+    sim = evaluate_angle(cue_x, cue_y, angle_deg, POCKETS[pocket_id])
     trainer = get_session(session_id).trainer
     return {
         "pocket_id": pocket_id,
@@ -1460,7 +1528,8 @@ def predict(req: PredictRequest) -> dict:
             status_code=400, detail="target_bounces must be 0, 1, 2, or 3"
         )
     angle_deg, decision = _decide_angle(session_id, pocket_id, mode, target_bounces)
-    sim = evaluate_angle(FIXED_CUE[0], FIXED_CUE[1], angle_deg, POCKETS[pocket_id])
+    cue_x, cue_y = _session_cue(session_id)
+    sim = evaluate_angle(cue_x, cue_y, angle_deg, POCKETS[pocket_id])
 
     confidence = max(0.0, min(1.0, 1.0 - (sim["min_distance"] / 30.0)))
     trainer = get_session(session_id).trainer
@@ -1491,7 +1560,7 @@ def predict(req: PredictRequest) -> dict:
         "is_trained_pocket": is_trained,
         "native_pocket": native_pocket,
         "trained_pockets": trained_pockets_base,
-        "cue": {"x": FIXED_CUE[0], "y": FIXED_CUE[1]},
+        "cue": {"x": cue_x, "y": cue_y},
         "angle_deg": round(float(angle_deg), 2),
         "predicted": sim,
         "confidence": round(confidence, 3),
